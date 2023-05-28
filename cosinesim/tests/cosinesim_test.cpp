@@ -94,7 +94,8 @@ static const TestParams s_testParamSet[] = {
 //    {100,    10000,  512, 3125000},  Too big for U50?
 
 #ifdef LONG_TESTS
-    {100,    10000,  512, 3000000},
+//    {100,    10000,  512, 3000000},  Too big for xsjtianhaoz95
+    {100,    10000,  512, 2000000},
 #endif
     
 #ifdef DEV_TESTS

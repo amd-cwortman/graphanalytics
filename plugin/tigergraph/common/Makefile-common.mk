@@ -46,6 +46,7 @@ STAGE_COPY_COMMON_FILES = \
     bin/common.sh \
 	bin/gen-cluster-info.py \
     bin/install-plugin-cluster.sh \
+	bin/update-tigergraph-config.sh \
     bin/install-plugin-node.sh\
     \
     udf/mergeHeaders.py \
@@ -94,8 +95,31 @@ STAGE_SUBDIRS = $(sort $(dir $(STAGE_ALL_FILES)))
 all: stage
 
 .PHONY: stage-common
-stage-common: $(STAGE_DIR) $(STAGE_SUBDIRS) $(STAGE_ALL_FILES)
+stage-common: $(STAGE_DIR) $(STAGE_SUBDIRS) $(STAGE_ALL_FILES) update-version
 
+# Target to rewrite staged files that contain the string ALVEO_TG_PLUGIN_PATH to a path relative to /opt/amd/apps
+# In the plug-in makefile, set STAGE_PLUGIN_PATH_FILES to a list of files relative to $(STAGE_DIR)
+#
+# $(PRODUCT_NAME) should be set to the directory name of the installed plugin (for example, recomengine)
+
+PRODUCT_VER=$(strip $(shell cat VERSION))
+BASE_PLUGIN_PREFIX = agml/integration/Tigergraph-3.x
+ifdef BUNDLE_DIR
+    PLUGIN_PREFIX = $(BASE_PLUGIN_PREFIX)/$(BUNDLE_DIR)
+else
+    PLUGIN_PREFIX = $(BASE_PLUGIN_PREFIX)
+endif
+
+.PHONY:
+update-version:
+	@fileList=($(STAGE_PLUGIN_PATH_FILES)); \
+	if [[ $${#fileList[@]} -gt 0 ]]; then \
+	    echo "INFO: Rewriting ALVEO_TG_PLUGIN_PATH to $(PLUGIN_PREFIX)/$(PRODUCT_NAME)/$(PRODUCT_VER)"; \
+	fi; \
+	for i in "$${fileList[@]}"; do \
+	    echo "   ...in $(STAGE_DIR)/$$i"; \
+	    sed -i 's,ALVEO_TG_PLUGIN_PATH,$(PLUGIN_PREFIX)/$(PRODUCT_NAME)/$(PRODUCT_VER),g' $(STAGE_DIR)/$$i; \
+	done
 
 $(STAGE_DIR):
 	mkdir -p $@
@@ -115,6 +139,7 @@ OSVER_MINOR = $(shell lsb_release -sr | tr -dc '0-9.' | cut -d \. -f2)
 OSVER_DIR=$(OSVER_MAJOR).$(OSVER_MINOR)
 DIST_TARGET =
 OSDISTLC =
+verbose=0
 ifeq ($(OSDIST),Ubuntu)
     DIST_TARGET = deb
 	OSDISTLC = ubuntu
@@ -124,8 +149,8 @@ else ifeq ($(OSDIST),CentOS)
 endif
 
 ARCH = $(shell uname -p)
-CPACK_PACKAGE_FILE_NAME= xilinx-$(PRODUCT_NAME)-tigergraph-$(PRODUCT_VER)_$(OSVER)-$(ARCH).$(DIST_TARGET)
-DIST_INSTALL_DIR = $(GRAPH_ANALYTICS_DIR)/scripts/amd-graphanalytics-install/$(OSDISTLC)-$(OSVER_DIR)/$(STANDALONE_NAME)/
+CPACK_PACKAGE_FILE_NAME= amd-$(PRODUCT_NAME)-tigergraph-$(PRODUCT_VER)-$(OSVER)-$(ARCH).$(DIST_TARGET)
+DIST_INSTALL_DIR = $(GRAPH_ANALYTICS_DIR)/scripts/amd-agml-install/$(OSDISTLC)-$(OSVER_DIR)/$(STANDALONE_NAME)/
 DIST_RELEASE = 0
 
 .PHONY: dist
@@ -133,8 +158,8 @@ DIST_RELEASE = 0
 dist: stage
 	@if [ $(DIST_RELEASE) == 1 ]; then \
 		echo "INFO: Removing previous versions of the package and vclf"; \
-		git rm -f $(DIST_INSTALL_DIR)/xilinx-$(PRODUCT_NAME)-tigergraph-?.*.$(DIST_TARGET).vclf; \
-        rm -f     $(DIST_INSTALL_DIR)/xilinx-$(PRODUCT_NAME)-tigergraph-?.*.$(DIST_TARGET); \
+		git rm -f $(DIST_INSTALL_DIR)/*-$(PRODUCT_NAME)-tigergraph-?.*.$(DIST_TARGET).vclf; \
+        rm -f     $(DIST_INSTALL_DIR)/*-$(PRODUCT_NAME)-tigergraph-?.*.$(DIST_TARGET); \
 	fi
 	
 	@if [ "$(DIST_TARGET)" == "" ]; then \
@@ -144,8 +169,9 @@ dist: stage
 	    cd package; \
 		make ; \
 		cd - ; \
+		mkdir -p $(DIST_INSTALL_DIR); \
 		cp -f ./package/$(CPACK_PACKAGE_FILE_NAME) $(DIST_INSTALL_DIR); \
-		echo "INFO: Package published to $(DIST_INSTALL_DIR)/$(CPACK_PACKAGE_FILE_NAME)"; \
+		echo "INFO: Package published to $(abspath $(DIST_INSTALL_DIR)/$(CPACK_PACKAGE_FILE_NAME))"; \
 	fi
 
 	@if [ $(DIST_RELEASE) == 1 ]; then \
@@ -157,9 +183,14 @@ dist: stage
 ifdef sshKey
     SSH_KEY_OPT=-i $(sshKey)
 endif
+ifeq ($(verbose),1)
+	VERBOSE_OPT=-v
+endif
+
+deviceNames=u50
 .PHONY: install
 install: stage
-	./staging/install.sh $(SSH_KEY_OPT)
+	./staging/install.sh $(SSH_KEY_OPT) $(VERBOSE_OPT) -d $(deviceNames)
 
 #######################################################################################################################
 #
@@ -175,7 +206,7 @@ clean-dist:
 clean-common: clean-dist
 	rm -rf $(STAGE_DIR)
 
-cleanall-common: clean-common
+cleanall: clean-common
 	rm -f package/*.deb package/*.rpm
 
 .PHONY: help-common
@@ -193,10 +224,11 @@ help-common:
 	@echo "  make clean-dist"
 	@echo "  Clean distribution package files"
 	@echo ""
+	@echo "  make cleanall"
+	@echo "  Clean distribution package files and all generated packages"
+
+help-common-options:
+	@echo ""
 	@echo "Options"
-	@echo "sshKey: run make with an ssh key for the user tigergraph"
-
-
-
-
-
+	@echo "  sshKey=ssh-key-file: run make with an ssh key for the user tigergraph"
+	@echo "  verbose=1|0: run install script in verbose mode"

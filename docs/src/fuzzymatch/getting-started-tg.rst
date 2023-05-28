@@ -13,7 +13,7 @@ Resolution product:
     Deploy Alveo card <../common/deploy-alveo.rst>
     Install TigerGraph <../common/install-tigergraph.rst>
     Install Python Virtual Environment (PyTigerGraph users ONLY) <../common/install-conda-python.rst>  
-    Install Entity Resolution Product <../fuzzymatch/install.rst>
+    Install AGML Plugin for TigerGraph <../common/install-agml.rst>
     Run Demo <../fuzzymatch-tg/usecases-ent-resolve.rst>
 
 

@@ -20,7 +20,7 @@ SHELL := /bin/bash
 
 # Location of cosine similarity Alveo product 
 ifndef XILINX_LOUVAIN
-    XILINX_LOUVAIN = /opt/xilinx/apps/graphanalytics/louvainmod
+    XILINX_LOUVAIN = /opt/amd/apps/agml/louvainmod
     export XILINX_LOUVAIN
 endif
 
@@ -44,12 +44,17 @@ MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/examples/cpp/Makefile}')
 
-LIB_PATH = $(XF_PROJ_ROOT)/staging/lib
+$(info XF_PROJ_ROOT is $(XF_PROJ_ROOT))
+LIB_PATH = $(XF_PROJ_ROOT)/lib
 INCLUDE_PATH = $(XF_PROJ_ROOT)/include
+XCLBIN_PATH = $(XF_PROJ_ROOT)/xclbin
+
+$(info LIB_PATH is $(LIB_PATH))
 
 ifeq ($(wildcard $(LIB_PATH)/*.so),)
     LIB_PATH = $(XILINX_LOUVAIN)/${PRODUCT_VER}/lib
     INCLUDE_PATH = $(XILINX_LOUVAIN)/${PRODUCT_VER}/include
+    XCLBIN_PATH = $(XILINX_LOUVAIN)/${PRODUCT_VER}/xclbin
 endif
 
 CXXFLAGS = -std=c++11 -fPIC -pthread -I$(INCLUDE_PATH) -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-label \
@@ -62,7 +67,7 @@ CXXFLAGS += -O3
 endif
 
 
-LDFLAGS = -L$(LIB_PATH) -lXilinxLouvain -lpthread -m64 -lzmq
+LDFLAGS = -L$(LIB_PATH) -lAMDLouvain -lpthread -m64 -lzmq
 
 all: cppdemo
 
@@ -76,15 +81,18 @@ alveoProject = $(basename $(notdir $(graph)))
 numNodes = 1
 numPars = 1
 numDevices = 1
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
-ifeq ($(deviceNames),xilinx_u50_gen3x16_xdma_201920_3)
-    xclbin = $(XILINX_LOUVAIN)/${PRODUCT_VER}/xclbin/louvainmod_pruning_xilinx_u50_gen3x16_xdma_201920_3.xclbin
-	KERNEL_MODE = -kernel_mode 2
+deviceNames=u50
+ifeq ($(deviceNames),u50)
+    xclbin = $(XCLBIN_PATH)/louvainmod_pruning_xilinx_u50_gen3x16_xdma_201920_3.xclbin
+    KERNEL_MODE = -kernel_mode 2
+else ifeq ($(deviceNames),u55c)
+    xclbin = $(XCLBIN_PATH)/louvainmod_2cu_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin
+    KERNEL_MODE = -kernel_mode 4
+else ifeq ($(deviceNames),aws-f1)
+    xclbin = $(XCLBIN_PATH)//louvainmod_no_hbm_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin
+    KERNEL_MODE = -kernel_mode 5
 endif
-ifeq ($(deviceNames),xilinx_u55c_gen3x16_xdma_base_2)
-    xclbin = $(XILINX_LOUVAIN)/${PRODUCT_VER}/xclbin/louvainmod_2cu_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin
-	KERNEL_MODE = -kernel_mode 4
-endif
+
 workers=192.168.1.21 192.168.1.31
 
 .PHONY: run run-create-partitions run-load-compute
@@ -161,7 +169,7 @@ help:
 	@echo "  make run-create-partitions [graph=/path/to/graph.mtx] [numPars=1]"
 	@echo "  Create partitions on a single node"
 	@echo ""
-	@echo "  make run [graph=/path/to/graph.mtx] [numPars=1] [numDevices=1] [deviceNames=xilinx_u50_gen3x16_xdma_201920_3]"
+	@echo "  make run [graph=/path/to/graph.mtx] [numPars=1] [numDevices=1] [deviceNames=u50]"
 	@echo "  Load partition and compute Louvain modularity on a single node"
 	@echo ""
 	@echo "  Run test in a 3 node cluster"
@@ -178,8 +186,9 @@ help:
 	@echo "graph: graph input .mtx file"
 	@echo "alveoProject : Alveo project name without .par.proj extension"
 	@echo "deviceNames  : Target device name. Supported devices: "
-	@echo "               xilinx_u50_gen3x16_xdma_201920_3"
-	@echo "               xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "               u50"
+	@echo "               u55c"
+	@echo "               aws-f1"
     @echo "numNodes     : Number of nodes (default=1)"
 	@echo "numPars      : Number of partitions (default=1)"
 	@echo "numDevices   : Number of devices (default=1)"	

@@ -109,6 +109,13 @@ class opLouvainModularity : public opBase {
     		long             		NE_mem_2,
     		KMemorys_host_prune     *buff_hosts_prune);
 
+    static void UsingFPGA_MapHostClBuff_prune_ddr(
+    		clHandle* 				hds,
+    		long             		NV,
+    		long             		NE_mem_1,
+    		long             		NE_mem_2,
+    		KMemorys_host_prune     *buff_hosts_prune);            
+
     static int cuExecute(
         clHandle* hds, cl::Kernel& kernel0, unsigned int num_runs, std::vector<cl::Event>* evIn, cl::Event* evOut);
 
@@ -125,11 +132,6 @@ class opLouvainModularity : public opBase {
 
     static void postProcess();
 
-    static void PhaseLoop_UsingFPGA_1_KernelSetup(bool isLargeEdge,
-                                                  cl::Kernel& kernel_louvain,
-                                                  std::vector<cl::Memory>& ob_in,
-                                                  std::vector<cl::Memory>& ob_out,
-                                                  clHandle* hds);
     static void PhaseLoop_UsingFPGA_1_KernelSetup_prune(bool isLargeEdge,
                                                   cl::Kernel& kernel_louvain,
                                                   std::vector<cl::Memory>& ob_in,
@@ -142,6 +144,13 @@ class opLouvainModularity : public opBase {
     		long             		NE_mem_1,
     		long             		NE_mem_2,
     		KMemorys_host_prune     *buff_hosts_prune);
+
+    static void UsingFPGA_MapHostClBuff_prune_2cu_ddr(
+    		clHandle* 				hds,
+    		long             		NV,
+    		long             		NE_mem_1,
+    		long             		NE_mem_2,
+    		KMemorys_host_prune     *buff_hosts_prune);            
 
     static void PhaseLoop_UsingFPGA_1_KernelSetup_prune_2cu(bool isLargeEdge,
                                                   cl::Kernel& kernel_louvain,

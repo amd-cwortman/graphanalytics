@@ -112,7 +112,7 @@ CREATE QUERY entity_resolution_loadvec_alveo( ) for graph @graph
     DOUBLE vm_peak, vm_hwm;
   	INT ret;
     DOUBLE matchExecTime;
-    ListAccum<string > @@refNamesAccum ;
+    ListAccum<string> @@refNamesAccum ;
     ListAccum<UINT> @@refIdAccum;
     #TYPEDEF TUPLE <id INT, score INT> MatchResultPair;
     #ListAccum<ListAccum<MatchResultPair>> result;
@@ -127,12 +127,15 @@ CREATE QUERY entity_resolution_loadvec_alveo( ) for graph @graph
     #newNamesSelect = SELECT t FROM newNamesSet:t ACCUM @@newNamesAccum += t.name;
    
     status = udf_fuzzymatch_loadvec_alveo(@@refNamesAccum,@@refIdAccum);
+
     IF status < 0 THEN
         PRINT status as LoadErrorCode;
     END;
+    #PRINT @@refNamesAccum AS refNamesAccum;
+    #PRINT @@refIdAccum AS refIdAccum;
 }
 
-CREATE QUERY entity_resolution_alveo( ) for graph @graph 
+CREATE QUERY entity_resolution_alveo(BOOL print_result = TRUE) for graph @graph 
 {
     DOUBLE vm_peak, vm_hwm;
   	INT ret;
@@ -143,7 +146,6 @@ CREATE QUERY entity_resolution_alveo( ) for graph @graph
     #ListAccum<ListAccum<MatchResultPair>> result;
     ListAccum<ListAccum<ListAccum<INT>>> @@result;
     INT similarity_level = 90;  // threshold for match
-
 
     newNamesSet = {new_names.*};
     newNamesSelect = SELECT t FROM newNamesSet:t ACCUM @@newNamesAccum += t.name;
@@ -160,18 +162,17 @@ CREATE QUERY entity_resolution_alveo( ) for graph @graph
     PRINT @@newNamesAccum.size() as TargetPersonsSize;
     IF matchExecTime < 0 THEN
         PRINT matchExecTime as MatchErrorCode;   
-    #ELSE
-        #PRINT matchExecTime as MatchExecTimeInMs;
-        #PRINT matchExecTime/@@newNamesAccum.size() as AvergeTimePerPersonInMs;   
+    ELSE
+        PRINT matchExecTime as MatchExecTimeInMs;
+        PRINT matchExecTime/@@newNamesAccum.size() as AvergeTimePerPersonInMs;   
     END;
 
-    #add result
-    PRINT @@newNamesAccum as NewNames;
-
-    PRINT @@result.size() as ResultSize;
-    PRINT @@result as TopKMatch;
-    
+    IF print_result THEN
+        #print result
+        PRINT @@newNamesAccum as NewNames;
+        PRINT @@result.size() as ResultSize;
+        PRINT @@result as TopKMatch;
+    END;    
 }
-
 
 INSTALL QUERY entity_resolution_tg, entity_resolution_perf_alveo, entity_resolution_alveo, entity_resolution_cpu,entity_resolution_loadvec_alveo

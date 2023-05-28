@@ -1,0 +1,158 @@
+ID,Vendor,Name,Model,Codename,Cores,Threads,Clock Low (GHz),Clock High (GHz),Socket,Process (nm),L3 Cache (MB),TDP (W),Released
+1,AMD,EPYC,7232P,Rome,8,16,3.1,3.2,Socket SP3,7,32,120,Aug 7th 2019
+2,AMD,EPYC,7251,Naples,8,16,2.1,2.9,Socket SP3,14,32,120,Jun 29th 2017
+3,AMD,EPYC,7252,Rome,8,16,2.8,3.2,Socket SP3,7,64,120,Aug 7th 2019
+4,AMD,EPYC,7261,Naples,8,16,2.5,2.9,Socket SP3,14,32,170,Jun 14th 2018
+5,AMD,EPYC,7262,Rome,8,16,3.1,3.3,Socket SP3,7,128,155,Aug 7th 2019
+6,AMD,EPYC,7272,Rome,12,24,2.6,3.2,Socket SP3,7,64,120,Aug 7th 2019
+7,AMD,EPYC,7281,Naples,16,32,2.1,2.7,Socket SP3,14,32,170,Jun 29th 2017
+8,AMD,EPYC,7282,Rome,16,32,2.8,3.2,Socket SP3,7,64,120,Aug 7th 2019
+9,AMD,EPYC,72F3,Milan,8,16,3.7,4.1,Socket SP3,7,256,180,Mar 15th 2021
+10,AMD,EPYC,7301,Naples,16,32,2.2,2.7,Socket SP3,14,64,170,Jun 29th 2017
+11,AMD,EPYC,7302,Rome,16,32,3,3.3,Socket SP3,7,128,155,Aug 7th 2019
+12,AMD,EPYC,7302P,Rome,16,32,3,3.3,Socket SP3,7,128,155,Aug 7th 2019
+13,AMD,EPYC,7313,Milan,16,32,3,3.7,Socket SP3,7,128,155,Mar 15th 2021
+14,AMD,EPYC,7313P,Milan,16,32,3,3.7,Socket SP3,7,128,155,Mar 15th 2021
+15,AMD,EPYC,7343,Milan,16,32,3.2,3.9,Socket SP3,7,128,190,Mar 15th 2021
+16,AMD,EPYC,7351,Naples,16,32,2.4,2.9,Socket SP3,14,64,170,Jun 29th 2017
+17,AMD,EPYC,7351P,Naples,16,32,2.4,2.9,Socket SP3,14,64,170,Jun 29th 2017
+18,AMD,EPYC,7352,Rome,24,48,2.4,3.3,Socket SP3,7,128,155,Aug 7th 2019
+19,AMD,EPYC,7371,Naples,16,32,3.1,3.8,Socket SP3,14,64,170,Nov 16th 2018
+20,AMD,EPYC,73F3,Milan,16,32,3.5,4,Socket SP3,7,256,240,Mar 15th 2021
+21,AMD,EPYC,7401,Naples,24,48,2,3,Socket SP3,14,64,170,Jun 29th 2017
+22,AMD,EPYC,7401P,Naples,24,48,2,3,Socket SP3,14,64,170,Jun 29th 2017
+23,AMD,EPYC,7402,Rome,24,48,2.8,3.35,Socket SP3,7,128,180,Aug 7th 2019
+24,AMD,EPYC,7402P,Rome,24,48,2.8,3.35,Socket SP3,7,128,180,Aug 7th 2019
+25,AMD,EPYC,7413,Milan,24,48,2.65,3.6,Socket SP3,7,128,180,Mar 15th 2021
+26,AMD,EPYC,7443,Milan,24,48,2.85,4,Socket SP3,7,128,200,Mar 15th 2021
+27,AMD,EPYC,7443P,Milan,24,48,2.85,4,Socket SP3,7,128,200,Mar 15th 2021
+28,AMD,EPYC,7451,Naples,24,48,2.3,3.2,Socket SP3,14,64,180,Jun 29th 2017
+29,AMD,EPYC,7452,Rome,32,64,2.2,3.35,Socket SP3,7,128,155,Aug 7th 2019
+30,AMD,EPYC,7453,Milan,28,56,2.75,3.45,Socket SP3,7,64,225,Mar 15th 2021
+31,AMD,EPYC,74F3,Milan,24,48,2.8,4,Socket SP3,7,256,240,Mar 15th 2021
+32,AMD,EPYC,7501,Naples,32,64,2,3,Socket SP3,14,64,170,Jun 29th 2017
+33,AMD,EPYC,7502,Rome,32,64,2.5,3.35,Socket SP3,7,128,180,Aug 7th 2019
+34,AMD,EPYC,7502P,Rome,32,64,2.5,3.35,Socket SP3,7,128,180,Aug 7th 2019
+35,AMD,EPYC,7513,Milan,32,64,2.6,3.65,Socket SP3,7,128,200,Mar 15th 2021
+36,AMD,EPYC,7542,Rome,32,64,2.9,3.4,Socket SP3,7,128,225,Aug 7th 2019
+37,AMD,EPYC,7543,Milan,32,64,2.8,3.7,Socket SP3,7,256,225,Mar 15th 2021
+38,AMD,EPYC,7543P,Milan,32,64,2.8,3.7,Socket SP3,7,256,225,Mar 15th 2021
+39,AMD,EPYC,7551,Naples,32,64,2,3,Socket SP3,14,64,180,Jun 29th 2017
+40,AMD,EPYC,7551P,Naples,32,64,2,3,Socket SP3,14,64,180,Jun 29th 2017
+41,AMD,EPYC,7552,Rome,48,96,2.2,3.35,Socket SP3,7,192,200,Aug 7th 2019
+42,AMD,EPYC,75F3,Milan,32,64,2.95,4,Socket SP3,7,256,280,Mar 15th 2021
+43,AMD,EPYC,7601,Naples,32,64,2.2,3.2,Socket SP3,14,64,180,Jun 29th 2017
+44,AMD,EPYC,7642,Rome,48,96,2.4,3.4,Socket SP3,7,256,225,Aug 7th 2019
+45,AMD,EPYC,7643,Milan,48,96,2.3,3.6,Socket SP3,7,256,225,Mar 15th 2021
+46,AMD,EPYC,7663,Milan,56,112,2,3.5,Socket SP3,7,256,240,Mar 15th 2021
+47,AMD,EPYC,7702,Rome,64,128,2,3.35,Socket SP3,7,256,200,Aug 7th 2019
+48,AMD,EPYC,7702P,Rome,64,128,2,3.35,Socket SP3,7,256,200,Aug 7th 2019
+49,AMD,EPYC,7713,Milan,64,128,2,3.675,Socket SP3,7,256,225,Mar 15th 2021
+50,AMD,EPYC,7713P,Milan,64,128,2,3.675,Socket SP3,7,256,225,Mar 15th 2021
+51,AMD,EPYC,7742,Rome,64,128,2.25,3.4,Socket SP3,7,256,225,Aug 7th 2019
+52,AMD,EPYC,7763,Milan,64,128,2.45,3.5,Socket SP3,7,256,280,Mar 15th 2021
+53,AMD,EPYC,7F32,Rome,8,16,3.7,3.9,Socket SP3,7,128,180,Apr 14th 2020
+54,AMD,EPYC,7F52,Rome,16,32,3.5,3.9,Socket SP3,7,256,155,Apr 14th 2020
+55,AMD,EPYC,7F72,Rome,24,48,3.2,3.7,Socket SP3,7,192,240,Apr 14th 2020
+56,AMD,EPYC,7H12,Rome,64,128,2.6,3.3,Socket SP3,7,256,280,Sep 18th 2019
+57,Intel,Xeon,Bronze 3106,Skylake-SP,8,0,2.1,3,Socket 3647,14,11,85,Jul 11th 2017
+58,Intel,Xeon,E-2124,Coffee Lake-S,4,0,3.4,4.5,Socket 1151,14,8,72,May 31st 2018
+59,Intel,Xeon,E-2124G,Coffee Lake-S,4,0,3.4,4.5,Socket 1151,14,8,72,May 31st 2018
+60,Intel,Xeon,E3-1280 v5,Skylake-S,4,8,3.7,4,Socket 1151,14,8,80,Oct 19th 2015
+61,Intel,Xeon,E3-1285 v4,Broadwell-DT,4,8,3.5,3.8,Socket 1150,14,6,95,Jun 2nd 2015
+62,Intel,Xeon,E3-1285 v6,Kaby Lake-DT,4,8,4.1,4.5,Socket 1151,14,8,79,Aug 1st 2017
+63,Intel,Xeon,E7-4809 v3,Haswell-EX,8,16,2,2,Socket 1150,22,20,115,Jun 1st 2015
+64,Intel,Xeon,E7-4820 v3,Haswell-EX,10,20,1.9,1.9,Socket 1150,22,25,115,Jun 1st 2015
+65,Intel,Xeon,E7-4830 v3,Haswell-EX,12,24,2.1,2.7,Socket 1150,22,30,115,Jun 1st 2015
+66,Intel,Xeon,E7-4850 v3,Haswell-EX,14,28,2.2,2.8,Socket 1150,22,35,115,Jun 1st 2015
+67,Intel,Xeon,E7-8860 v3,Haswell-EX,16,32,2.2,3.2,Socket 1150,22,40,140,Jun 1st 2015
+68,Intel,Xeon,E7-8867 v3,Haswell-EX,16,32,2.5,3.3,Socket 1150,22,45,165,Jun 1st 2015
+69,Intel,Xeon,E7-8870 v3,Haswell-EX,18,36,2.1,2.9,Socket 1150,22,45,140,Jun 1st 2015
+70,Intel,Xeon,E7-8880 v3,Haswell-EX,18,36,2.3,3.1,Socket 1150,22,45,150,Jun 1st 2015
+71,Intel,Xeon,E7-8880L v3,Haswell-EX,18,36,2,2.8,Socket 1150,22,45,115,Jun 1st 2015
+72,Intel,Xeon,E7-8890 v3,Haswell-EX,18,36,2.5,3.3,Socket 2011,22,45,165,Jun 1st 2015
+73,Intel,Xeon,E7-8891 v3,Haswell-EX,10,20,2.8,3.5,Socket 1150,22,45,165,Jun 1st 2015
+74,Intel,Xeon,E7-8893 v3,Haswell-EX,4,8,3.2,3.5,Socket 1150,22,45,140,Jun 1st 2015
+75,Intel,Xeon,Gold 5315Y,Ice Lake-SP,8,16,3.2,3.6,Socket 4189,10,12,140,Apr 6th 2021
+76,Intel,Xeon,Gold 5317,Ice Lake-SP,12,24,3,3.6,Socket 4189,10,18,150,Apr 6th 2021
+77,Intel,Xeon,Gold 5318H,Cooper Lake-SP,18,36,2.5,3.8,Socket 4189,14,24.75,150,Apr 6th 2021
+78,Intel,Xeon,Gold 5318N,Ice Lake-SP,24,48,2.1,3.4,Socket 4189,10,36,150,Apr 6th 2021
+79,Intel,Xeon,Gold 5318S,Ice Lake-SP,24,48,2.1,3.4,Socket 4189,10,36,165,Apr 6th 2021
+80,Intel,Xeon,Gold 5318Y,Ice Lake-SP,24,48,2.1,3.4,Socket 4189,10,36,165,Apr 6th 2021
+81,Intel,Xeon,Gold 5320,Ice Lake-SP,26,52,2.2,3.4,Socket 4189,10,39,185,Apr 6th 2021
+82,Intel,Xeon,Gold 5320H,Cooper Lake-SP,20,40,2.4,4.2,Socket 4189,14,27.5,150,Apr 6th 2021
+83,Intel,Xeon,Gold 5320T,Ice Lake-SP,20,40,2.3,3.5,Socket 4189,10,30,150,Apr 6th 2021
+84,Intel,Xeon,Gold 6154,Skylake-SP,18,36,3,3.7,Socket 3647,14,24.75,200,Jul 11th 2017
+85,Intel,Xeon,Gold 6312U,Ice Lake-SP,24,48,2.4,3.6,Socket 4189,10,36,185,Apr 6th 2021
+86,Intel,Xeon,Gold 6314U,Ice Lake-SP,32,64,2.3,3.4,Socket 4189,10,48,205,Apr 6th 2021
+87,Intel,Xeon,Gold 6326,Ice Lake-SP,16,32,2.9,3.5,Socket 4189,10,24,185,Apr 6th 2021
+88,Intel,Xeon,Gold 6328H,Cooper Lake-SP,16,32,2.8,4.3,Socket 4189,14,22,165,Apr 6th 2021
+89,Intel,Xeon,Gold 6328HL,Cooper Lake-SP,16,32,2.8,4.3,Socket 4189,14,22,165,Apr 6th 2021
+90,Intel,Xeon,Gold 6330,Ice Lake-SP,28,56,2,3.1,Socket 4189,10,42,205,Apr 6th 2021
+91,Intel,Xeon,Gold 6330H,Cooper Lake-SP,24,48,2,3.7,Socket 4189,14,33,150,Apr 6th 2021
+92,Intel,Xeon,Gold 6334,Ice Lake-SP,8,16,3.6,3.7,Socket 4189,10,18,165,Apr 6th 2021
+93,Intel,Xeon,Gold 6336Y,Ice Lake-SP,24,48,2.4,3.6,Socket 4189,10,36,185,Apr 6th 2021
+94,Intel,Xeon,Gold 6338N,Ice Lake-SP,32,64,2.2,3.5,Socket 4189,10,48,185,Apr 6th 2021
+95,Intel,Xeon,Gold 6338T,Ice Lake-SP,24,48,2.1,3.4,Socket 4189,10,36,165,Apr 6th 2021
+96,Intel,Xeon,Gold 6342,Ice Lake-SP,24,48,2.8,3.5,Socket 4189,10,36,230,Apr 6th 2021
+97,Intel,Xeon,Gold 6346,Ice Lake-SP,16,32,3.1,3.6,Socket 4189,10,36,205,Apr 6th 2021
+98,Intel,Xeon,Gold 6348,Ice Lake-SP,28,56,2.6,3.5,Socket 4189,10,42,235,Apr 6th 2021
+99,Intel,Xeon,Gold 6348H,Cooper Lake-SP,24,48,2.3,4.2,Socket 4189,14,33,165,Apr 6th 2021
+100,Intel,Xeon,Gold 6354,Ice Lake-SP,18,36,3,3.6,Socket 4189,10,39,205,Apr 6th 2021
+101,Intel,Xeon,Phi 7120A,Knights Corner,61,244,1238,1333,PCIe x16,22,0,300,Apr 6th 2014
+102,Intel,Xeon,Phi 7210,Knights Landing,64,256,1300,1500,Socket 3647,14,0,215,Jun 20th 2016
+103,Intel,Xeon,Phi 7210F,Knights Landing,64,256,1300,1500,Socket 3647,14,0,230,Jun 20th 2016
+104,Intel,Xeon,Phi 7230,Knights Landing,64,256,1300,1500,Socket 3647,14,0,215,Jun 20th 2016
+105,Intel,Xeon,Phi 7230F,Knights Landing,64,256,1300,1500,Socket 3647,14,0,230,Jun 20th 2016
+106,Intel,Xeon,Phi 7235,Knights Mill,64,256,1300,1400,Socket 3647,14,0,250,Dec 1st 2017
+107,Intel,Xeon,Phi 7250,Knights Landing,68,272,1400,1600,Socket 3647,14,0,215,Jun 20th 2016
+108,Intel,Xeon,Phi 7250F,Knights Landing,68,272,1400,1600,Socket 3647,14,0,230,Jun 20th 2016
+109,Intel,Xeon,Phi 7285,Knights Mill,68,272,1300,1400,Socket 3647,14,0,250,Dec 1st 2017
+110,Intel,Xeon,Phi 7290,Knights Landing,72,288,1500,1700,Socket 3647,14,0,245,Jun 20th 2016
+111,Intel,Xeon,Phi 7290F,Knights Landing,72,288,1500,1700,Socket 3647,14,0,260,Jun 20th 2016
+112,Intel,Xeon,Phi 7295,Knights Mill,72,288,1500,1600,Socket 3647,14,0,320,Dec 1st 2017
+113,Intel,Xeon,Platinum 8180,Skylake-SP,28,56,2.5,3.8,Socket 3647,14,38.5,205,Jul 11th 2017
+114,Intel,Xeon,Platinum 8180M,Skylake-SP,28,56,2.5,3.8,Socket 3647,14,38.5,205,Jul 11th 2017
+115,Intel,Xeon,Platinum 8253,Cascade Lake-SP,16,32,2.2,3,Socket 3647,14,22,125,Dec 11th 2018
+116,Intel,Xeon,Platinum 8256,Cascade Lake-SP,4,8,3.8,3.9,Socket 3647,14,16.5,105,Dec 11th 2018
+117,Intel,Xeon,Platinum 8260,Cascade Lake-SP,24,48,2.4,3.9,Socket 3647,14,35.75,165,Dec 11th 2018
+118,Intel,Xeon,Platinum 8260M,Cascade Lake-SP,24,48,2.4,3.9,Socket 3647,14,35.75,165,Dec 11th 2018
+119,Intel,Xeon,Platinum 8268,Cascade Lake-SP,24,48,2.9,3.9,Socket 3647,14,35.75,205,Dec 11th 2018
+120,Intel,Xeon,Platinum 8270,Cascade Lake-SP,26,52,2.7,4,Socket 3647,14,35.75,205,Dec 11th 2018
+121,Intel,Xeon,Platinum 8276,Cascade Lake-SP,28,56,2.2,4,Socket 3647,14,38.5,165,Dec 11th 2018
+122,Intel,Xeon,Platinum 8280,Cascade Lake-SP,28,56,2.7,4,Socket 3647,14,38.5,205,Dec 11th 2018
+123,Intel,Xeon,Platinum 8280M,Cascade Lake-SP,28,56,2.7,4,Socket 3647,14,38.5,205,Dec 11th 2018
+124,Intel,Xeon,Platinum 8351N,Ice Lake-SP,36,72,2.4,3.5,Socket 4189,10,54,225,Apr 6th 2021
+125,Intel,Xeon,Platinum 8352M,Ice Lake-SP,32,64,2.3,3.5,Socket 4189,10,48,185,Apr 6th 2021
+126,Intel,Xeon,Platinum 8352S,Ice Lake-SP,32,64,2.2,3.4,Socket 4189,10,48,205,Apr 6th 2021
+127,Intel,Xeon,Platinum 8352V,Ice Lake-SP,36,72,2.5,3.5,Socket 4189,10,54,195,Apr 6th 2021
+128,Intel,Xeon,Platinum 8353H,Cooper Lake-SP,18,36,2.5,3.8,Socket 4189,14,24.75,150,Apr 6th 2021
+129,Intel,Xeon,Platinum 8354H,Cooper Lake-SP,18,36,3.1,4.3,Socket 4189,14,24.75,205,Apr 6th 2021
+130,Intel,Xeon,Platinum 8356H,Cooper Lake-SP,8,16,3.9,4.4,Socket 4189,14,35.75,190,Apr 6th 2021
+131,Intel,Xeon,Platinum 8358,Ice Lake-SP,32,64,2.6,3.4,Socket 4189,10,48,250,Apr 6th 2021
+132,Intel,Xeon,Platinum 8358P,Ice Lake-SP,32,64,2.6,3.4,Socket 4189,10,48,240,Apr 6th 2021
+133,Intel,Xeon,Platinum 8360H,Cooper Lake-SP,24,48,3,4.2,Socket 4189,14,33,225,Apr 6th 2021
+134,Intel,Xeon,Platinum 8360HL,Cooper Lake-SP,24,48,3,4.2,Socket 4189,14,33,225,Apr 6th 2021
+135,Intel,Xeon,Platinum 8360Y,Ice Lake-SP,36,72,2.4,3.5,Socket 4189,10,54,250,Apr 6th 2021
+136,Intel,Xeon,Platinum 8362,Ice Lake-SP,32,64,2.8,3.6,Socket 4189,10,48,265,Apr 6th 2021
+137,Intel,Xeon,Platinum 8368,Ice Lake-SP,38,76,2.4,3.4,Socket 4189,10,57,270,Apr 6th 2021
+138,Intel,Xeon,Platinum 8368Q,Ice Lake-SP,38,76,2.6,3.7,Socket 4189,10,57,270,Apr 6th 2021
+139,Intel,Xeon,Platinum 8376H,Cooper Lake-SP,28,56,2.6,4.3,Socket 4189,14,38.5,205,Apr 6th 2021
+140,Intel,Xeon,Platinum 8376HL,Cooper Lake-SP,28,56,2.6,4.3,Socket 4189,14,38.5,205,Apr 6th 2021
+141,Intel,Xeon,Platinum 8380,Ice Lake-SP,40,80,2.3,3.4,Socket 4189,10,60,270,Apr 6th 2021
+142,Intel,Xeon,Platinum 8380H,Cooper Lake-SP,28,56,2.9,4.3,Socket 4189,14,38.5,250,Apr 6th 2021
+143,Intel,Xeon,Platinum 8380HL,Cooper Lake-SP,28,56,2.9,4.3,Socket 4189,14,38.5,250,Apr 6th 2021
+144,Intel,Xeon,Platinum 9221,Cascade Lake-AP,32,64,2.1,3.7,BGA5903,14,71.5,250,Apr 2nd 2019
+145,Intel,Xeon,Platinum 9222,Cascade Lake-AP,32,64,2.3,3.7,BGA5903,14,71.5,250,Apr 2nd 2019
+146,Intel,Xeon,Platinum 9242,Cascade Lake-AP,48,96,2.3,3.8,BGA5903,14,71.5,350,Apr 2nd 2019
+147,Intel,Xeon,Platinum 9282,Cascade Lake-AP,56,112,2.6,3.8,BGA5903,14,77,400,Apr 2nd 2019
+148,Intel,Xeon,Silver 4116,Skylake-SP,12,24,2.1,3,Socket 3647,14,16.5,85,Jul 11th 2017
+149,Intel,Xeon,Silver 4309Y,Ice Lake-SP,8,16,2.8,3.6,Socket 4189,10,12,105,Apr 6th 2021
+150,Intel,Xeon,Silver 4310,Ice Lake-SP,12,24,2.1,3.3,Socket 4189,10,18,120,Apr 6th 2021
+151,Intel,Xeon,Silver 4310T,Ice Lake-SP,10,20,2.3,3.4,Socket 4189,10,15,105,Apr 6th 2021
+152,Intel,Xeon,Silver 4314,Ice Lake-SP,16,32,2.4,3.4,Socket 4189,10,24,135,Apr 6th 2021
+153,Intel,Xeon,Silver 4316,Ice Lake-SP,20,40,2.3,3.4,Socket 4189,10,30,150,Apr 6th 2021
+154,Intel,Xeon,W-11855M,Tiger Lake-H,6,12,3.2,4.9,BGA1499,10,18,35,May 11th 2021
+155,Intel,Xeon,W-11955M,Tiger Lake-H,8,16,2.6,5,BGA1499,10,24,35,May 11th 2021
+156,Intel,Xeon,W-2195,Skylake-W,18,36,2.3,4.3,Socket 2066,14,24.75,140,Sep 29th 2017
+157,Intel,Xeon,W-3175X,Skylake-W,28,56,3.1,4.3,Socket 3647,14,38.5,255,Dec 19th 2018

@@ -3,7 +3,7 @@ Document Source Code
 
 # Generating HTML Document
 ## Set Up Environment
-Run `./setup.sh` to set up the environment for generating documents
+Run `source setup.sh` to set up the environment for generating documents.
 
 ## Makefile targets
 

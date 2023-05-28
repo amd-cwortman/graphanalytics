@@ -23,23 +23,23 @@
 # determine the names and locations of the components of that Alveo Product.
 #
 # Alveo product names
-pluginAlveoProductName="Xilinx Fuzzy Match"
-standaloneAlveoProductName="Xilinx Fuzzy Match"
+pluginAlveoProductName="AMD Fuzzy Match"
+standaloneAlveoProductName="AMD Fuzzy Match"
 
-# The usual place where the Alveo Product is installed
-pluginInstalledAlveoProductPath=/opt/xilinx/apps/graphanalytics/fuzzymatch/0.3
+# Name of the directory containing the Alveo Product installation
+pluginInstalledAlveoProductDirName=fuzzymatch
 
-# Where to find the git repo for the Alveo Product if it exists
-pluginLocalAlveoProductPath=$SCRIPTPATH/../../../../../fuzzymatch/staging
+# Where to find the git repo for the Alveo Product if it exists, relative to the repo dir
+pluginLocalAlveoProductPath=fuzzymatch/staging
 
 # The name of supported XCLBIN files
-pluginSupportedDevices="xilinx_u50_gen3x16_xdma_201920_3 xilinx_aws-vu9p-f1_shell-v04261818_201920_2 xilinx_u55c_gen3x16_xdma_base_2"
+pluginSupportedDevices="u50 aws-f1 u55c"
 pluginXclbinNameU50=fuzzy_xilinx_u50_gen3x16_xdma_201920_3.xclbin
 pluginXclbinNameAwsF1=fuzzy_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin
 pluginXclbinNameU55C=fuzzy_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin
 
 # The name of the Alveo Product's .so file
-pluginLibName=libXilinxFuzzyMatch.so
+pluginLibName=libAMDFuzzyMatch.so
 
 # Set to 1 if the Alveo Product's .so needs to be added to LD_PRELOAD
 pluginAlveoProductLibNeedsPreload=1
@@ -61,7 +61,8 @@ pluginMainUdf=udf/xilinxFuzzyMatch.hpp
 
 # List of header files to copy from the Alveo Product into the TigerGraph application area
 # and UDF compilation area.  The paths are relative to $pluginAlveoProductPath.
-pluginAlveoProductHeaders="include/fuzzymatch.hpp include/xilinx_apps_common.hpp src/fuzzymatch_loader.cpp src/fuzzymatch_utils.cpp"
+pluginAlveoProductHeaders="include/fuzzymatch.hpp include/xilinx_apps_common.hpp src/fuzzymatch_loader.cpp \
+src/fuzzymatch_utils.cpp include/xilinx_apps_loader.hpp"
 
 # List of header files to copy from the plugin into the TigerGraph application area
 # and UDF compilation area.  The paths are relative to the plugin top directory

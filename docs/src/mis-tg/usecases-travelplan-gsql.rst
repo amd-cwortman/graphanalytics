@@ -11,7 +11,7 @@ Run Bash Script with GSQL
 .. code-block:: bash
 
    # Copy examples from the installation to your own working directory mis-examples
-   cp -r /opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/mis/%MIS_TG_VERSION/examples mis-examples
+   cp -r /opt/amd/apps/agml/integration/Tigergraph-3.x/agml/%PACKAGE_VERSION/mis/examples mis-examples
 
    cd mis-examples/travelplan
 
@@ -33,4 +33,4 @@ with **full** path to data files as follows (assuming working under home directo
 .. code-block:: bash
 
     # Run travelplan speedup demo
-    ./bin/run.sh -u <username> -p <password> tp2tr=$HOME/mis-examples/travelplan/data/travelplan2trucks2000.csv tp2wo=$HOME/mis-examples/travelplan/data/travelplan2workorders2000.csv
+    ./bin/run.sh -u <username> -p <password> -t $HOME/mis-examples/travelplan/data/travelplan2trucks2000.csv -w $HOME/mis-examples/travelplan/data/travelplan2workorders2000.csv

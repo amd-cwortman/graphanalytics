@@ -1,11 +1,8 @@
-.. _louvain-setup-tg3-label:
+.. mis-setup-tg3-label:
 
 =============================================
-Set up Community Detection for TigerGraph 3.x
+Set up Maximal Independent Set for TigerGraph 3.x
 =============================================
-
-The Community Detection consists of Louvain Modularity library integrated into 
-TigerGraph 3.x via plugins and UDFs.
 
 .. include:: ../common/install-conda-python.rst
 
@@ -15,9 +12,9 @@ TigerGraph 3.x via plugins and UDFs.
 
 .. code-block:: bash
 
-    (fpga)$ mkdir comdetect-example
-    (fpga)$ cd comdetect-example
-    (fpga)$ cp -r /opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/comdetect/%COMDETECT_TG_VERSION/examples .
+    (fpga)$ mkdir mis-example
+    (fpga)$ cd mis-example
+    (fpga)$ cp -r /opt/amd/apps/agml/integration/Tigergraph-3.x/agml/%PACKAGE_VERSION/mis/examples .
 
 
 3. Install demo specific plugin

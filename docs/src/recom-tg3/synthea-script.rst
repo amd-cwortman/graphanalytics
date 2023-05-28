@@ -9,7 +9,7 @@ Run Bash Script with GSQL
 .. code-block:: bash
 
    # Copy examples from the installation to your own working directory
-   cp -r /opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/recomengine/%RECOMENGINE_TG_VERSION/examples recomengine-examples
+   cp -r /opt/amd/apps/agml/integration/Tigergraph-3.x/agml/%PACKAGE_VERSION/recomengine/examples recomengine-examples
 
    cd recomengine-examples/synthea
 

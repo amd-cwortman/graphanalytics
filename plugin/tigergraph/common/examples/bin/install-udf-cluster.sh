@@ -30,3 +30,7 @@ fi
 
 grun all "${SCRIPTPATH}/install-udf-node.sh $*"
 
+# Update TigerGraph configuration
+echo "INFO: Update TigerGraph configuration for the selected example"
+$SCRIPTPATH/../../../bin/update-tigergraph-config.sh -r
+

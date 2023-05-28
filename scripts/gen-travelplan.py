@@ -26,8 +26,9 @@ import random
 total_travelplans = int(sys.argv[1])
 total_trucks = int(sys.argv[2])
 total_workorders = int(sys.argv[3])
-out_file_tp2tr = "travelplan2trucks" + str(total_travelplans) + ".csv"
-out_file_tp2wo = "travelplan2workorders" + str(total_travelplans) + ".csv"
+print('INFO: Generating MIS data with {} travel plans, {} trucks, and {} work orders'.format(total_travelplans, total_trucks, total_workorders))
+out_file_tp2tr = 'travelplan2trucks-' + str(total_travelplans) + '-' + str(total_trucks) + '-' + str(total_workorders) + '.csv'
+out_file_tp2wo = 'travelplan2workorders-' + str(total_travelplans) + '-' + str(total_trucks) + '-' + str(total_workorders) + '.csv'
 out_fh_tp2tr = open(out_file_tp2tr, 'w')
 out_fh_tp2wo = open(out_file_tp2wo, 'w')
 
@@ -53,7 +54,7 @@ tr = 0
 for tps in y:
     for tp in range(tps):
         print('tp' + str(tp_num) + ',' + 'tr' + str(tr), file=out_fh_tp2tr)
-        print('tp' + str(tp_num) + ',' + 'tr' + str(tr))
+        #print('tp' + str(tp_num) + ',' + 'tr' + str(tr))
         tp_num += 1
     tr += 1
 
@@ -73,7 +74,7 @@ for i in range(total_travelplans):
     for workorder_sel in wo_sel_list:
         wo_added[workorder_sel] = 1
         print('tp' + str(i) + ',' + 'wo' + str(workorder_sel), file=out_fh_tp2wo)
-        print('tp' + str(i) + ',' + 'wo' + str(workorder_sel))
+        #print('tp' + str(i) + ',' + 'wo' + str(workorder_sel))
         total_tr2wo += 1
 
 # now add workorders not yet added evenly
@@ -81,7 +82,7 @@ tp_num = 0
 for i in range(total_workorders):
     if i not in wo_added:
         print('tp' + str(tp_num%total_travelplans) + ',' + 'wo' + str(i), file=out_fh_tp2wo)
-        print('tp' + str(tp_num%total_travelplans) + ',' + 'wo' + str(i))
+        #print('tp' + str(tp_num%total_travelplans) + ',' + 'wo' + str(i))
         tp_num += 1
         total_tr2wo += 1
 

@@ -26,7 +26,7 @@ passWord = "tigergraph"                             # TG user password
 
 # Local (client) Query Path Setup
 localRepoLocation = Path("/opt/xilinx/apps")
-exampleLocation = Path("graphanalytics/integration/Tigergraph-3.x/mis/0.6/examples/travelplan/") # NOTE: modify path according to the mis version installed
+exampleLocation = Path("ALVEO_TG_PLUGIN_PATH/examples/travelplan/") # NOTE: modify path according to the mis version installed
 queryFileLocation = localRepoLocation / exampleLocation / "query"
 
 # Server Data Path Setup
@@ -107,16 +107,6 @@ def build_edges(conn, graphName):
     for res in result:
         for k in res:
                 print(k, ":", res[k])
-
-    print('Waiting for Graph to stabilize...')
-    tp2tp_edges = 0
-    while(True):
-        time.sleep(10)
-        edges = conn.getEdgeCountFrom(edgeType='tp2tp')
-        if(edges == tp2tp_edges):
-            break
-        tp2tp_edges = edges
-    print('Done!')
 
 
 ## Install all queries

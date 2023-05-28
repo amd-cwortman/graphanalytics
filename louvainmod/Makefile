@@ -26,17 +26,8 @@ PRODUCT_VER=$(strip $(shell cat VERSION))
 #all: javaApi cppBuild javaTest stage
 all: stage
 
-#
-# Global Definitions
-#
-
-## Location of graphanalytics project
-GRAPH_ANALYTICS_DIR = ..
-
-# General output directory for intermediate build artifacts
-BUILD_DIR = build
-# Product version
-PRODUCT_VER=$(strip $(shell cat VERSION))
+# Common targets for all products (packaging)
+include ../common/Makefile-common.mk
 
 #######################################################################################################################
 #
@@ -50,15 +41,14 @@ CXX = g++
 # -D PRINTINFO: print additional debug messages
 CXXFLAGS = -std=c++11 -DPRAGMA -fopenmp -fmessage-length=0  -fPIC -Wall -Wno-unknown-pragmas -Wno-unused-label \
     -Wno-unused-variable -Wno-sign-compare -Wno-unused-result -Wno-unused-but-set-variable \
-    -Wno-narrowing -D USE_HBM -fmessage-length=0 -D LOUVAINMOD 
+    -Wno-narrowing -fmessage-length=0 -D LOUVAINMOD 
 
 # Define the target directories.
 #DEBUG = 1
 ifdef DEBUG
     CPP_BUILD_DIR = Debug
     #CXXFLAGS += -O0 -g -D_SINGLE_THREAD_
-	#CXXFLAGS += -O0 -g
-	CXXFLAGS += -O3 -Ofast
+	CXXFLAGS += -O0 -g
 else
     CPP_BUILD_DIR = Release
     CXXFLAGS += -O3 -Ofast -DNDEBUG
@@ -73,6 +63,7 @@ endif
 INCLUDES_libLouvain = \
 	-Iinclude \
 	-I$(GRAPH_ANALYTICS_DIR)/louvainmod/grappolo/include \
+	-I$(XILINX_HLS)/include \
 	-I$(XILINX_XRT)/include \
 	-I$(XILINX_XRM)/include \
 	-I$(GRAPH_ANALYTICS_DIR)/L2/include \
@@ -80,15 +71,16 @@ INCLUDES_libLouvain = \
 	-isystem $(GRAPH_ANALYTICS_DIR)/ext/HLS_arbitrary_Precision_Types/include \
 	-I$(GRAPH_ANALYTICS_DIR)/ext/xcl2 \
 	-I$(GRAPH_ANALYTICS_DIR)/ext \
+	-I$(GRAPH_ANALYTICS_DIR)/common/include \
 	-I$(GRAPH_ANALYTICS_DIR)/plugin/tigergraph/comdetect/udf/QueryUdf \
 #	-I${JAVA_HOME}/include \
 #	-I${JAVA_HOME}/include/linux
 
 LDLIBS_libLouvain = \
 	
-LIB_SHORT_NAME = XilinxLouvain
+LIB_SHORT_NAME = AMDLouvain
 LIB_NAME = lib$(LIB_SHORT_NAME).so
-LOADER_SHORT_NAME = XilinxLouvain_loader
+LOADER_SHORT_NAME = AMDLouvain_loader
 LOADER_NAME = lib$(LOADER_SHORT_NAME).a
 
 #SRCS_L3 = $(wildcard $(GRAPH_ANALYTICS_DIR)/L3/src/*.cpp) $(GRAPH_ANALYTICS_DIR)/ext/xcl2/xcl2.cpp
@@ -279,6 +271,7 @@ INCLUDES_test = \
 	-Iinclude \
 	-Itests \
 	-Itests/findcommunities \
+	-I$(XILINX_HLS)/include \
 	-I$(XILINX_XRT)/include \
 	-I$(XILINX_XRM)/include \
 	-I$(GRAPH_ANALYTICS_DIR)/L2/include \
@@ -346,14 +339,27 @@ ifneq ($(communityOutput),)
     communityOutputOpt = -o $(communityOutput)
 endif
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
-ifeq ($(deviceNames),xilinx_u50_gen3x16_xdma_201920_3)
+deviceNames=u50
+ifeq ($(deviceNames),u50)
     XCLBIN_RUN = $(CURDIR)/staging/xclbin/louvainmod_pruning_xilinx_u50_gen3x16_xdma_201920_3.xclbin
-	KERNEL_MODE = -kernel_mode 2
+    KERNEL_MODE = -kernel_mode 2
 endif
-ifeq ($(deviceNames),xilinx_u55c_gen3x16_xdma_base_2)
-    XCLBIN_RUN = $(CURDIR)/staging/xclbin/louvainmod_2cu_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin
-	KERNEL_MODE = -kernel_mode 4
+
+ifeq ($(deviceNames),u55c)
+    XCLBIN_RUN = $(CURDIR)/staging/xclbin/louvainmod_2cu_xilinx_u55c_gen3x16_xdma_3_202210_1.xclbin
+    KERNEL_MODE = -kernel_mode 4
+endif
+
+ifeq ($(deviceNames),aws-f1)
+    # kernel_mode = LOUVAINMOD_2CU_DDR (5)
+    XCLBIN_RUN = $(CURDIR)/staging/xclbin/$(XCLBIN_INSTALLED_NAME_AWS_F1)
+    KERNEL_MODE = -kernel_mode 5
+endif
+
+ifeq ($(deviceNames),u250)
+    # kernel_mode = LOUVAINMOD_2CU_DDR (5)
+    XCLBIN_RUN = $(CURDIR)/staging/xclbin/$(XCLBIN_INSTALLED_NAME_U250)
+    KERNEL_MODE = -kernel_mode 5
 endif
 
 CMDLINE_CREATE_PARTITIONS = $(graph) $(KERNEL_MODE) -num_pars $(numPars) -create_alveo_partitions \
@@ -419,6 +425,9 @@ run-load-compute-worker2: stage cppTest
 	. $(XILINX_XRM)/setup.sh; \
 	LD_LIBRARY_PATH=$(PWD)/$(CPP_BUILD_DIR):$$LD_LIBRARY_PATH; $(CPP_BUILD_DIR)/cppdemo $(CMDLINE_LOAD_COMPUTE_WORKER2)	
 
+run-staging-cpp: cppTest stage
+	cd staging/examples/cpp && make run deviceNames=$(deviceNames)
+
 debug-cppdemo: cppTest
 	rm -rf $(CPPDEMO_OUT_DIR)
 	mkdir -p $(CPPDEMO_OUT_DIR)
@@ -472,22 +481,54 @@ L2_BUILD_DIR_U50 = $(L2_TOP_DIR_U50)/build_dir.hw.$(L2_XDEVICE_U50)
 XCLBIN_NAME_U50 = kernel_louvain_pruning_alias.xclbin
 XCLBIN_FILE_U50 = $(L2_BUILD_DIR_U50)/$(XCLBIN_NAME_U50)
 XCLBIN_INSTALLED_NAME_U50 = louvainmod_pruning_$(L2_XDEVICE_U50).xclbin
-XCLBIN_INSTALLED_U50 =/opt/xilinx/apps/graphanalytics/louvainmod/1.0/xclbin/$(XCLBIN_INSTALLED_NAME_U50)
+XCLBIN_INSTALLED_U50 =/opt/amd/apps/agml/louvainmod/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U50)
+
 # U55 XCLBIN 
-L2_TOP_DIR_U55 = $(GRAPH_ANALYTICS_DIR)/L2/louvainmod_2cu_u55c_kernel
-L2_XDEVICE_U55 = xilinx_u55c_gen3x16_xdma_2_202110_1
-L2_BUILD_DIR_U55 = $(L2_TOP_DIR_U55)/build_dir.hw.$(L2_XDEVICE_U55)
+L2_TOP_DIR_U55C = $(GRAPH_ANALYTICS_DIR)/L2/louvainmod_2cu_u55c_huge_degree_kernel
+L2_XDEVICE_U55 = xilinx_u55c_gen3x16_xdma_3_202210_1
+L2_BUILD_DIR_U55 = $(L2_TOP_DIR_U55C)/build_dir.hw.$(L2_XDEVICE_U55)
 XCLBIN_NAME_U55 = kernel_louvain_2cu_u55c_alias.xclbin
 XCLBIN_FILE_U55 = $(L2_BUILD_DIR_U55)/$(XCLBIN_NAME_U55)
 XCLBIN_INSTALLED_NAME_U55 = louvainmod_2cu_$(L2_XDEVICE_U55).xclbin
-XCLBIN_INSTALLED_U55 =/opt/xilinx/apps/graphanalytics/louvainmod/1.0/xclbin/$(XCLBIN_INSTALLED_NAME_U55)
+XCLBIN_INSTALLED_U55 =/opt/amd/apps/agml/louvainmod/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U55)
 
+# AWS-F1 XCLBIN HACK-FIXME
+#L2_TOP_DIR_AWS_F1 = $(GRAPH_ANALYTICS_DIR)/L2/louvainmod_2cu_ddr
+L2_TOP_DIR_AWS_F1 = $(GRAPH_ANALYTICS_DIR)/L2/louvainmod_ddr
+L2_XDEVICE_AWS_F1 = xilinx_aws-vu9p-f1_shell-v04261818_201920_2
+L2_BUILD_DIR_AWS_F1 = $(L2_TOP_DIR_AWS_F1)/build_dir.hw.$(L2_XDEVICE_AWS_F1)
+#XCLBIN_NAME_AWS_F1 = kernel_louvain_2cu_ddr_alias.awsxclbin
+XCLBIN_NAME_AWS_F1 = kernel_louvain_no_hbm_alias.awsxclbin
+XCLBIN_FILE_AWS_F1 = $(L2_BUILD_DIR_AWS_F1)/$(XCLBIN_NAME_AWS_F1)
+#XCLBIN_INSTALLED_NAME_AWS_F1 = louvainmod_2cu_ddr_$(L2_XDEVICE_AWS_F1).awsxclbin
+XCLBIN_INSTALLED_NAME_AWS_F1 = louvainmod_no_hbm_$(L2_XDEVICE_AWS_F1).awsxclbin
+XCLBIN_INSTALLED_AWS_F1 =/opt/amd/apps/agml/louvainmod/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_AWS_F1)
 
-ifeq ($(USE_U55C),1)
-	XCLBIN_BUILD_DIR=$(L2_TOP_DIR_U55)
-else
-	XCLBIN_BUILD_DIR=$(L2_TOP_DIR_U50)
+# U250
+L2_TOP_DIR_U250 = $(GRAPH_ANALYTICS_DIR)/L2/louvainmod_ddr
+L2_XDEVICE_U250 = xilinx_u250_gen3x16_xdma_2_1_202010_1
+L2_BUILD_DIR_U250 = $(L2_TOP_DIR_U250)/build_dir.hw.$(L2_XDEVICE_U250)
+XCLBIN_NAME_U250 = kernel_louvain_ddr_alias.xclbin
+XCLBIN_FILE_U250 = $(L2_BUILD_DIR_U250)/$(XCLBIN_NAME_U250)
+XCLBIN_INSTALLED_NAME_U250 = louvainmod_ddr_$(L2_XDEVICE_U250).xclbin
+XCLBIN_INSTALLED_U250 =/opt/amd/apps/agml/louvainmod/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U250)
+
+ifeq ($(deviceNames),u50)
+    XCLBIN_BUILD_DIR=$(L2_TOP_DIR_U50)
 endif
+
+ifeq ($(deviceNames),u55c)
+    XCLBIN_BUILD_DIR=$(L2_TOP_DIR_U55C)
+endif
+
+ifeq ($(deviceNames),aws-f1)
+    XCLBIN_BUILD_DIR=$(L2_TOP_DIR_AWS_F1)
+endif
+
+ifeq ($(deviceNames),u250)
+    XCLBIN_BUILD_DIR=$(L2_TOP_DIR_U250)
+endif
+
 
 .PHONY: xclbin
 xclbin:
@@ -508,10 +549,9 @@ $(XCLBIN_FILE_U50):
 	    false; \
 	fi
 
-	
 $(XCLBIN_FILE_U55):
 	@if [ -r $(XCLBIN_INSTALLED_U55) ]; then \
-	    echo "INFO: The XCLBIN file $(XCLBIN_FILE_U50) is missing.  Copying from installed area."; \
+	    echo "INFO: The XCLBIN file $(XCLBIN_FILE_U55) is missing.  Copying from installed area."; \
 	    cp -r $(XCLBIN_INSTALLED_U55) $@; \
 	else \
 	    echo "ERROR: The XCLBIN file $(XCLBIN_FILE_U55) is missing."; \
@@ -521,6 +561,29 @@ $(XCLBIN_FILE_U55):
 	    false; \
 	fi
 
+$(XCLBIN_FILE_AWS_F1):
+	@if [ -r $(XCLBIN_INSTALLED_AWS_F1) ]; then \
+	    echo "INFO: The XCLBIN file $(XCLBIN_FILE_AWS_F1) is missing.  Copying from installed area."; \
+	    cp -r $(XCLBIN_INSTALLED_AWS_F1) $@; \
+	else \
+	    echo "ERROR: The XCLBIN file $(XCLBIN_FILE_AWS_F1) is missing."; \
+	    echo "Because building an XCLBIN file can be an all-day proposition, you have two choices for completing this build:"; \
+	    echo "1. Copy a pre-built XCLBIN to the target location above.  (Recommended for developers)"; \
+	    echo "2. Do 'make xclbin' and go for a very long coffee break.  (Recommended for build automation)"; \
+	    false; \
+	fi
+
+$(XCLBIN_FILE_U250):
+	@if [ -r $(XCLBIN_INSTALLED_U250) ]; then \
+	    echo "INFO: The XCLBIN file $(XCLBIN_FILE_U250) is missing.  Copying from installed area."; \
+	    cp -r $(XCLBIN_INSTALLED_U250) $@; \
+	else \
+	    echo "ERROR: The XCLBIN file $(XCLBIN_FILE_U250) is missing."; \
+	    echo "Because building an XCLBIN file can be an all-day proposition, you have two choices for completing this build:"; \
+	    echo "1. Copy a pre-built XCLBIN to the target location above.  (Recommended for developers)"; \
+	    echo "2. Do 'make xclbin' and go for a very long coffee break.  (Recommended for build automation)"; \
+	    false; \
+	fi
 #######################################################################################################################
 #
 # Staging
@@ -593,6 +656,10 @@ STAGE_XCLBIN_NAME_U50 = $(XCLBIN_INSTALLED_NAME_U50)
 STAGE_XCLBIN_FILE_U50 = $(STAGE_DIR)/xclbin/$(STAGE_XCLBIN_NAME_U50)
 STAGE_XCLBIN_NAME_U55 = $(XCLBIN_INSTALLED_NAME_U55)
 STAGE_XCLBIN_FILE_U55 = $(STAGE_DIR)/xclbin/$(STAGE_XCLBIN_NAME_U55)
+STAGE_XCLBIN_NAME_AWS_F1 = $(XCLBIN_INSTALLED_NAME_AWS_F1)
+STAGE_XCLBIN_FILE_AWS_F1 = $(STAGE_DIR)/xclbin/$(STAGE_XCLBIN_NAME_AWS_F1)
+STAGE_XCLBIN_NAME_U250 = $(XCLBIN_INSTALLED_NAME_U250)
+STAGE_XCLBIN_FILE_U250 = $(STAGE_DIR)/xclbin/$(STAGE_XCLBIN_NAME_U250)
 
 $(STAGE_XCLBIN_FILE_U50): $(XCLBIN_FILE_U50)
 	cp -f $^ $@
@@ -600,22 +667,26 @@ $(STAGE_XCLBIN_FILE_U50): $(XCLBIN_FILE_U50)
 $(STAGE_XCLBIN_FILE_U55): $(XCLBIN_FILE_U55)
 	cp -f $^ $@
 
-STAGE_XILINX_APPS_COMMON = $(STAGE_DIR)/include/xilinx_apps_common.hpp
-XILINX_APPS_COMMON = $(GRAPH_ANALYTICS_DIR)/ext/xilinx_apps_common.hpp
-$(STAGE_XILINX_APPS_COMMON): $(XILINX_APPS_COMMON)
-	cp -f $^ $@
+$(STAGE_XCLBIN_FILE_AWS_F1): $(XCLBIN_FILE_AWS_F1)
+	cp -f $^ $@	
+
+$(STAGE_XCLBIN_FILE_U250): $(XCLBIN_FILE_U250)
+	cp -f $^ $@	
 
 # Top-level packaging rule
 
 STAGE_SUBDIR_NAMES = include lib src xclbin
 STAGE_SUBDIRS = $(addprefix $(STAGE_DIR)/,$(STAGE_SUBDIR_NAMES))
 STAGE_ALL_FILES = \
+    $(STAGE_COPY_COMMON_FILES) \
     $(addprefix $(STAGE_DIR)/,$(STAGE_COPY_FILES)) \
     $(addprefix $(STAGE_DIR)/lib/,$(STAGE_LIB_FILES)) \
-    $(STAGE_XCLBIN_FILE_U50) \
-	$(STAGE_XCLBIN_FILE_U55) \
     $(STAGE_DIR)/$(STAGE_EXAMPLE_ZIP) \
-	$(STAGE_XILINX_APPS_COMMON) \
+    $(STAGE_XCLBIN_FILE_U250) \
+#    $(STAGE_XCLBIN_FILE_U50) \
+#    $(STAGE_XCLBIN_FILE_U55) \
+#    $(STAGE_XCLBIN_FILE_AWS_F1) \
+
 
 # make staging areaing in two steps so intermediate outputs can be included in the 
 # staging output as well.
@@ -626,9 +697,6 @@ stage2: cppTest $(STAGE_SUBDIRS) stage-examples $(STAGE_ALL_FILES)
 
 $(STAGE_SUBDIRS):
 	mkdir -p $@
-
-# Common targets for all products (packaging)
-include ../common/Makefile-common.mk
 
 #######################################################################################################################
 #
@@ -653,8 +721,8 @@ help:
 	@echo "  make run-create-partitions [graph=/path/to/graph.mtx] [numPars=1]"
 	@echo "  Create partitions on a single node"
 	@echo ""
-	@echo "  make run [graph=/path/to/graph.mtx] [numPars=1] [numDevices=1] [deviceNames=xilinx_u50_gen3x16_xdma_201920_3]"
-	@echo "  Load partition and compute Louvain modularity on a single node"
+	@echo "  make run [graph=/path/to/graph.mtx] [numPars=1] [numDevices=1] [deviceNames=u50]"
+	@echo "    Load partition and compute Louvain modularity on a single node"
 	@echo ""
 	@echo "  Run test in a 3 node cluster"
 	@echo "  ssh to driver"
@@ -667,7 +735,10 @@ help:
 	@echo "  make run-load-compute-worker2 [graph=/path/to/graph.mtx] [numNodes=1] [numDevices=1]"
 	@echo ""
 	@echo "  debug-cppdemo"
-	@echo "  Debug cppdemo"
+	@echo "    Debug cppdemo"
+	@echo ""	
+	@echo "  make run-staging-cpp"
+	@echo "      Run the CPP example from the staging area"		
 	@echo ""
 	@echo "-------- Options --------"
 	@echo "DEBUG          : 1: build application in debug mode. 0: build application in release mode."
@@ -675,8 +746,9 @@ help:
 	@echo "alveoProject   : Alveo project name without .par.proj extension"
 	@echo "numNodes       : Number of nodes (default=1)"
 	@echo "deviceNames    : Target device name. Supported devices: "
-	@echo "                 xilinx_u50_gen3x16_xdma_201920_3"
-	@echo "                 xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "                   u50"
+	@echo "                   u55c"
+	@echo "                   aws-f1"
 	@echo "numPars        : Number of partitions (default=1)"
 	@echo "numDevices     : Number of devices (default=1)"
 	@echo "communityOutput: Output file for detected communities"

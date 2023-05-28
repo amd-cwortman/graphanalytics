@@ -145,12 +145,12 @@ class FuzzyMatch  {
     // The intialize process will download FPGA binary to FPGA card, and initialize the HBM/DDR FACTIVA tables.
     int startFuzzyMatch();
     //int fuzzyMatchLoadVec(std::vector<std::string>& patternVec);
-    int fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int> vec_id=std::vector<int>());
+    int fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int64_t> vec_id=std::vector<int64_t>());
 
     // run fuzzymatch in batch mode
     // return vector of  hit patterns in pairs {id,score} for each input string. 
     // for each string , return maximum top 100 of hit patterns.
-    std::vector<std::vector<std::pair<int,int>>> executefuzzyMatch(std::vector<std::string> input_patterns, int similarity_level);
+    std::vector<std::vector<std::pair<int64_t,int>>> executefuzzyMatch(std::vector<std::string> input_patterns, int similarity_level);
 
    private:
      FuzzyMatchImpl *pImpl_ = nullptr;

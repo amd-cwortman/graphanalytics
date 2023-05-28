@@ -103,6 +103,21 @@ fi
 #
 
 #
+# HACK-FIXME: remove all other AGML examples before installing a new one
+#
+#all_demo_plugins="travelPlanDemo "
+#if [ -f $tg_udf_dir/ExprFunctions.hpp ]; then
+#    if [ -x $tg_udf_dir/mergeHeaders.py ]; then
+#        for plugin in $all_demo_plugins
+#        do
+#            mv $tg_udf_dir/ExprFunctions.hpp $tg_udf_dir/ExprFunctions.hpp.prev
+#            python3 $tg_udf_dir/mergeHeaders.py -u $tg_udf_dir/ExprFunctions.hpp.prev $plugin \
+#                 > $tg_udf_dir/ExprFunctions.hpp
+#        done
+#    fi
+#fi
+
+#
 # Check that the plugin's dependencies are installed first
 #
 
@@ -169,3 +184,6 @@ done
 for i in $PLUGIN_SCRIPTS; do
     . $plugin_src_dir/bin/$i
 done
+
+# HACK-FIXME: Remove all previously compiled UDF libraries
+rm -rf $tg_root_dir/bin/libudf/*

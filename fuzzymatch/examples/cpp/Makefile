@@ -19,7 +19,7 @@ SHELL := /bin/bash
 
 # Location of Fuzzy Match Alveo product 
 ifndef XILINX_FUZZYMATCH
-    XILINX_FUZZYMATCH = /opt/xilinx/apps/graphanalytics/fuzzymatch
+    XILINX_FUZZYMATCH = /opt/amd/apps/agml/fuzzymatch
     export XILINX_FUZZYMATCH
 endif
 
@@ -27,11 +27,6 @@ endif
 ifndef XILINX_XRT
     XILINX_XRT = /opt/xilinx/xrt
     export XILINX_XRT
-endif
-
-ifndef XILINX_XRM
-    XILINX_XRM=/opt/xilinx/xrm
-    export XILINX_XRM
 endif
 
 #the default PRODUCT_VER as the latest version
@@ -56,16 +51,13 @@ endif
 CXXFLAGS = -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0 -fPIC -pthread -I$(INCLUDE_PATH) -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-label \
     -Wno-unused-variable -Wno-unused-parameter -Wno-missing-field-initializers -Wno-deprecated-declarations
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
-XDEVICE = $(basename $(notdir $(deviceNames)))
+deviceNames=u50
 
-
-XF_LIB_DIR := $(abspath $(XF_PROJ_ROOT))/examples
-ifeq ($(XDEVICE), xilinx_u50_gen3x16_xdma_201920_3)
+ifeq ($(deviceNames),u50)
 	XCLBIN_FILE := $(XCLBIN_PATH)/fuzzy_xilinx_u50_gen3x16_xdma_201920_3.xclbin
-else ifeq ($(XDEVICE), xilinx_aws-vu9p-f1_shell-v04261818_201920_2)
+else ifeq ($(deviceNames),aws-f1)
     XCLBIN_FILE := $(XCLBIN_PATH)/fuzzy_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin 
-else ifeq ($(XDEVICE),xilinx_u55c_gen3x16_xdma_base_2)
+else ifeq ($(deviceNames),u55c)
     XCLBIN_FILE := $(XCLBIN_PATH)/fuzzy_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin 
 else
     $(warning [WARNING]: This project has not been tested for $(deviceNames). It may or may not work.)
@@ -89,7 +81,7 @@ demo: $(EXE_FILE)
 $(EXE_FILE): fuzzymatch_demo.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@ \
 		-I$(XILINX_XRT)/include \
-		-L$(LIB_PATH) -lXilinxFuzzyMatch \
+		-L$(LIB_PATH) -lAMDFuzzyMatch \
 		-L$(XILINX_XRT)/lib -lOpenCL -lpthread -m64
 
 .PHONY: run clean
@@ -121,15 +113,14 @@ clean:
 
 help:
 	@echo "Makefile usages:"
-	@echo "  make run [runMode=0] [deviceNames=xilinx_u50_gen3x16_xdma_201920_3] [totalEntities=10000000]"
+	@echo "  make run [runMode=0] [deviceNames=u50] [totalEntities=10000000]"
 	@echo "    Run standalone test with statically linked executable"
 	@echo ""
 	@echo "  Run options:"
-	@echo "  deviceNames  : Specify Alveo devices to use for computation"
-	@echo "                 Supported devices:"
-	@echo "                 xilinx_u50_gen3x16_xdma_201920_3(default) "
-	@echo "                 xilinx_aws-vu9p-f1_shell-v04261818_201920_2"
-	@echo "                 xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "  deviceNames  : Specify Alveo devices to use for computation. Supported devices:"
+	@echo "                   u50 (default) "
+	@echo "                   u55c"
+	@echo "                   aws-f1"
 	@echo "  numEntities  : Number of entities to match (default=100)"
 	@echo "  runMode      : 0: Run on Alveo Only (default)"
 	@echo "                 1: Run on CPU Only"

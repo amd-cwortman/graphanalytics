@@ -14,6 +14,12 @@
 # limitations under the License.
 #
 
+SHELL := /bin/bash
+
+# Product name and version
+PRODUCT_VER=$(strip $(shell cat VERSION))
+STANDALONE_NAME=fuzzymatch
+
 .DELETE_ON_ERROR:
 .PHONY: all
 
@@ -21,18 +27,8 @@
 #all: stage
 all: stage cppBuild pythonApi  
 
-#
-# Global Definitions
-#
-
-## Location of graphanalytics project
-GRAPH_ANALYTICS_DIR = ..
-
-# General output directory for intermediate build artifacts
-BUILD_DIR = build
-# Product version
-PRODUCT_VER=$(strip $(shell cat VERSION))
-STANDALONE_NAME=fuzzymatch
+# Common targets for all products
+include ../common/Makefile-common.mk
 
 #######################################################################################################################
 #
@@ -80,16 +76,17 @@ INCLUDES_libFuzzyMatch = \
 	-I$(GRAPH_ANALYTICS_DIR)/L3/include \
 	-isystem $(GRAPH_ANALYTICS_DIR)/ext/HLS_arbitrary_Precision_Types/include \
 	-I$(GRAPH_ANALYTICS_DIR)/ext/xcl2 \
-	-I$(GRAPH_ANALYTICS_DIR)/ext
+	-I$(GRAPH_ANALYTICS_DIR)/ext \
+	-I$(GRAPH_ANALYTICS_DIR)/common/include
 #	-I$(GRAPH_ANALYTICS_DIR)/plugin/tigergraph/comdetect/udf/QueryUdf 
 #	-I${JAVA_HOME}/include \
 #	-I${JAVA_HOME}/include/linux
 
 LDLIBS_libFuzzyMatch = \
 	
-LIB_SHORT_NAME = XilinxFuzzyMatch
+LIB_SHORT_NAME = AMDFuzzyMatch
 LIB_NAME = lib$(LIB_SHORT_NAME).so
-LOADER_SHORT_NAME = XilinxFuzzyMatch_loader
+LOADER_SHORT_NAME = AMDFuzzyMatch_loader
 LOADER_NAME = lib$(LOADER_SHORT_NAME).a
 
 SRCS_L3 = $(GRAPH_ANALYTICS_DIR)/ext/xcl2/xcl2.cpp
@@ -185,7 +182,7 @@ L2_BUILD_DIR_U50 = $(L2_TOP_DIR_U50)/build_dir.hw.$(L2_XDEVICE_U50)
 XCLBIN_NAME_U50 = fuzzy_kernel.xclbin 
 XCLBIN_FILE_U50 = $(L2_BUILD_DIR_U50)/$(XCLBIN_NAME_U50)
 XCLBIN_INSTALLED_NAME_U50 = fuzzy_xilinx_u50_gen3x16_xdma_201920_3.xclbin
-XCLBIN_INSTALLED_U50 =/opt/xilinx/apps/graphanalytics/fuzzymatch/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U50)
+XCLBIN_INSTALLED_U50 = /opt/amd/apps/agml/fuzzymatch/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U50)
 
 XCLBIN_BUILD_DIR=$(L2_TOP_DIR_U50)
 
@@ -196,7 +193,7 @@ L2_BUILD_DIR_F1 = $(L2_TOP_DIR_F1)/build_dir.hw.$(L2_XDEVICE_F1)
 XCLBIN_NAME_F1 = fuzzy_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin
 XCLBIN_FILE_F1 = $(L2_BUILD_DIR_F1)/$(XCLBIN_NAME_F1)
 XCLBIN_INSTALLED_NAME_F1 = $(XCLBIN_NAME_F1)
-XCLBIN_INSTALLED_F1 =/opt/xilinx/apps/graphanalytics/fuzzymatch/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_F1)
+XCLBIN_INSTALLED_F1 = /opt/amd/apps/agml/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_F1)
 
 #U55C
 L2_TOP_DIR_U55C = $(GRAPH_ANALYTICS_DIR)/L2/fuzzy_kernel
@@ -205,7 +202,7 @@ L2_BUILD_DIR_U55C = $(L2_TOP_DIR_U55C)/build_dir.hw.$(L2_XDEVICE_U55C)
 XCLBIN_NAME_U55C = fuzzy_kernel.xclbin
 XCLBIN_FILE_U55C = $(L2_BUILD_DIR_U55C)/$(XCLBIN_NAME_U55C)
 XCLBIN_INSTALLED_NAME_U55C = fuzzy_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin
-XCLBIN_INSTALLED_U55C =/opt/xilinx/apps/graphanalytics/fuzzymatch/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U55C)
+XCLBIN_INSTALLED_U55C = /opt/amd/apps/agml/fuzzymatch/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U55C)
 
 #U250/Azure
 L2_TOP_DIR_U250= $(GRAPH_ANALYTICS_DIR)/L2/fuzzy_kernel
@@ -214,12 +211,12 @@ L2_BUILD_DIR_U250 = $(L2_TOP_DIR_U250)/build_dir.hw.$(L2_XDEVICE_U250)
 XCLBIN_NAME_U250 = fuzzy_kernel.bit.xclbin
 XCLBIN_FILE_U250 = $(L2_BUILD_DIR_U250)/$(XCLBIN_NAME_U250)
 XCLBIN_INSTALLED_NAME_U250 = fuzzy_xilinx_u250_gen3x16_xdma_2_1_202010_1.xclbin
-XCLBIN_INSTALLED_U250 =/opt/xilinx/apps/graphanalytics/fuzzymatch/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U250)
+XCLBIN_INSTALLED_U250 = /opt/amd/apps/agml/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_U250)
 
 XCLBIN_NAME_AZURE_U250 = fuzzy_kernel.azure.xclbin
 XCLBIN_FILE_AZURE_U250 = $(L2_BUILD_DIR_U250)/$(XCLBIN_NAME_AZURE_U250)
 XCLBIN_INSTALLED_NAME_AZURE_U250 = fuzzy_xilinx_azure_u250_gen3x16_xdma_2_1_202010_1.xclbin
-XCLBIN_INSTALLED_AZURE_U250 =/opt/xilinx/apps/graphanalytics/fuzzymatch/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_AZURE_U250)
+XCLBIN_INSTALLED_AZURE_U250 = /opt/amd/apps/agml/$(PRODUCT_VER)/xclbin/$(XCLBIN_INSTALLED_NAME_AZURE_U250)
 
 .PHONY: xclbin
 
@@ -298,7 +295,7 @@ PYTHON_DIR = /usr/include/$(PYTHON)
 PYTHONENV_NAME = pyvenv
 PYTHONENV = ./$(PYTHONENV_NAME)/bin/$(PYTHON)
 PYTHON_API_DIR = wrappers/python
-PYTHON_LIB_NAME := xilFuzzyMatchPython.so #$(shell python-config --extension-suffix)
+PYTHON_LIB_NAME := AMDFuzzyMatchPython.so #$(shell python-config --extension-suffix)
 
 SRC_FILE_NAMES_python = pythonapi.cpp
 PYTHON_INC_FLAGS = $(shell python3-config --includes)
@@ -405,14 +402,14 @@ $(CPP_BUILD_DIR)/fuzzymatch_test: $(CPP_BUILD_DIR)/fuzzymatch_test.o $(CPP_BUILD
 ###############################################################################
 # Test targets and parameters
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
-ifeq ($(deviceNames), xilinx_u50_gen3x16_xdma_201920_3)
+deviceNames=u50
+ifeq ($(deviceNames), u50)
     XCLBIN_RUN = $(CURDIR)/staging/xclbin/$(XCLBIN_INSTALLED_NAME_U50)
-else ifeq ($(deviceNames), xilinx_aws-vu9p-f1_shell-v04261818_201920_2)
+else ifeq ($(deviceNames), aws-f1)
     XCLBIN_RUN = $(CURDIR)/staging/xclbin/$(XCLBIN_INSTALLED_NAME_F1)
-else ifeq ($(deviceNames), xilinx_u55c_gen3x16_xdma_base_2)
+else ifeq ($(deviceNames), u55c)
     XCLBIN_RUN = $(CURDIR)/staging/xclbin/$(XCLBIN_INSTALLED_NAME_U55C)
-else ifeq ($(deviceNames), xilinx_u250_gen3x16_xdma_shell_2_1)
+else ifeq ($(deviceNames), u250)
     XCLBIN_RUN = $(CURDIR)/staging/xclbin/$(XCLBIN_INSTALLED_NAME_U250)
 else ifeq ($(deviceNames), azure_u250)
     XCLBIN_RUN = $(CURDIR)/staging/xclbin/$(XCLBIN_INSTALLED_NAME_AZURE_U250)	
@@ -573,33 +570,28 @@ $(STAGE_XCLBIN_FILE_AZURE_U250): $(XCLBIN_FILE_AZURE_U250)
 	cp -f $^ $@	
 
 
-STAGE_XILINX_APPS_COMMON = $(STAGE_DIR)/include/xilinx_apps_common.hpp
-XILINX_APPS_COMMON = $(GRAPH_ANALYTICS_DIR)/ext/xilinx_apps_common.hpp
-$(STAGE_XILINX_APPS_COMMON): $(XILINX_APPS_COMMON)
-	cp -f $^ $@
-
 # Top-level packaging rule
 
 STAGE_SUBDIR_NAMES = include lib src xclbin
 STAGE_SUBDIRS = $(addprefix $(STAGE_DIR)/,$(STAGE_SUBDIR_NAMES))
 STAGE_ALL_FILES = \
+    $(STAGE_COPY_COMMON_FILES) \
     $(addprefix $(STAGE_DIR)/,$(STAGE_COPY_FILES)) \
     $(addprefix $(STAGE_DIR)/lib/,$(STAGE_LIB_FILES)) \
     $(STAGE_DIR)/$(STAGE_EXAMPLE_ZIP) \
-	$(STAGE_XILINX_APPS_COMMON) \
 
 # Conditionally add XCLBIN files
 ifeq ($(INC_ALL_XCLBINS),1) 
 	STAGE_ALL_FILES += $(STAGE_XCLBIN_FILE_U50) $(STAGE_XCLBIN_FILE_F1) \
 	                   $(STAGE_XCLBIN_FILE_U55C) $(STAGE_XCLBIN_FILE_U250) \
 					   $(STAGE_XCLBIN_FILE_AZURE_U250)
-else ifeq ($(deviceNames), xilinx_u50_gen3x16_xdma_201920_3)
+else ifeq ($(deviceNames), u50)
     STAGE_ALL_FILES += $(STAGE_XCLBIN_FILE_U50)
-else ifeq ($(deviceNames), xilinx_aws-vu9p-f1_shell-v04261818_201920_2)
+else ifeq ($(deviceNames), aws-f1)
     STAGE_ALL_FILES += $(STAGE_XCLBIN_FILE_F1)
-else ifeq ($(deviceNames), xilinx_u55c_gen3x16_xdma_base_2)
+else ifeq ($(deviceNames), u55c)
     STAGE_ALL_FILES += $(STAGE_XCLBIN_FILE_U55C)
-else ifeq ($(deviceNames), xilinx_u250_gen3x16_xdma_shell_2_1)
+else ifeq ($(deviceNames), u250)
     STAGE_ALL_FILES += $(STAGE_XCLBIN_FILE_U250)
 else ifeq ($(deviceNames), azure_u250)
     STAGE_ALL_FILES += $(STAGE_XCLBIN_FILE_AZURE_U250)	
@@ -615,10 +607,6 @@ stage2: $(STAGE_SUBDIRS) stage-examples $(STAGE_ALL_FILES)
 $(STAGE_SUBDIRS):
 	mkdir -p $@
 
-
-# Common targets for all products
-include ../common/Makefile-common.mk
-
 #######################################################################################################################
 #
 # Java Tests
@@ -629,33 +617,32 @@ javaTest:
 	cd test/java && ant
 
 help: help-common
-	@echo "  make run [runMode=0] [deviceNames=xilinx_u50_gen3x16_xdma_201920_3] [totalEntities=10000000]"
+	@echo "  make run [runMode=0] [deviceNames=u50] [totalEntities=10000000]"
 	@echo "    Run standalone test with statically linked executable"
 	@echo ""
-	@echo "  Run options:"
-	@echo "  deviceNames  : Specify Alveo devices to use for computation"
-	@echo "                 Supported devices:"
-	@echo "                 xilinx_u50_gen3x16_xdma_201920_3 (default)"
-	@echo "                 xilinx_u55c_gen3x16_xdma_base_2"	
-	@echo "                 xilinx_u250_gen3x16_xdma_shell_2_1"
-	@echo "                 xilinx_aws-vu9p-f1_shell-v04261818_201920_2"
-	@echo "                 azure_u250"
-	@echo "  patternFile  :  Pattern file to match against (default=./examples/data/ref-names.csv)"
-	@echo "  patternIndex :  The column index to extract field of interest from the pattern file (default=1)"
-	@echo "  inputFile    :  Input file that needs to be matched against patternFile (default=./examples/data/new-names.csv)"
-	@echo "  inputIndex   :  The column index to extract field of interest from the input file (default=1)"
-	@echo "  numEntities  : Number of entities to match (default=100)"
-	@echo "  runMode      : 0: Run on Alveo Only (default)"
-	@echo "                 1: Run on CPU Only"
-	@echo "                 2: Run on both Alveo and CPU"
-	@echo "  totalEntities: total number of entities to match against(default=10000000)"
-	@echo "  threshold    : similarity score threshold to be considered a match. An integer value representing percentage. (default=90 or 90%) "
+	@echo "    Run options:"
+	@echo "    deviceNames  : Specify Alveo devices to use for computation. Supported devices:"
+	@echo "                     u50 (default)"
+	@echo "                     u55c"	
+	@echo "                     u250"
+	@echo "                     aws-f1"
+	@echo "                     azure_u250"
+	@echo "    patternFile  :  Pattern file to match against (default=./examples/data/ref-names.csv)"
+	@echo "    patternIndex :  The column index to extract field of interest from the pattern file (default=1)"
+	@echo "    inputFile    :  Input file that needs to be matched against patternFile (default=./examples/data/new-names.csv)"
+	@echo "    inputIndex   :  The column index to extract field of interest from the input file (default=1)"
+	@echo "    numEntities  : Number of entities to match (default=100)"
+	@echo "    runMode      : 0: Run on Alveo Only (default)"
+	@echo "                   1: Run on CPU Only"
+	@echo "                   2: Run on both Alveo and CPU"
+	@echo "    totalEntities: total number of entities to match against(default=10000000)"
+	@echo "    threshold    : similarity score threshold to be considered a match. An integer value representing percentage. (default=90 or 90%) "
 	@echo ""
 	@echo "  make all"
-	@echo "  Compile fuzzyMatch lib and generate staging area"
+	@echo "    Compile fuzzyMatch lib and generate staging area"
 	@echo "" 
 	@echo "  make run-staging-cpp"
-	@echo "  Run the CPP example from the staging area"
+	@echo "    Run the CPP example from the staging area"
 	@echo ""
 	@echo "  Common options"
 	@echo "  INC_ALL_XCLBINS: 1: Include all supported XCLBINs for staging (default). 0: Only incude target XCLBIN"

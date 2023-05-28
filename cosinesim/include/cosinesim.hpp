@@ -219,11 +219,11 @@ namespace cosinesim
  * 
  * Note that you will still have to include `-ldl` on your link line to pull in the standard dynamic loading library.
  * 
- * The loader source file is located in `/opt/xilinx/apps/graphanalytics/cosinesim/@version/src`.  Note the macro
+ * The loader source file is located in `/opt/amd/apps/agml/cosinesim/@version/src`.  Note the macro
  * definition that comes before the inclusion of `%cosinesim.hpp`.
  * 
  * **TIP:** When using either dynamic loading technique, if the order of symbol loading causes unexplained behavior in
- * your application, you can try adding `libXilinxCosineSim.so` to the list of pre-loaded shared libraries,
+ * your application, you can try adding `libAmdCosineSim.so` to the list of pre-loaded shared libraries,
  * as explained in [this Stack Overflow article](https://stackoverflow.com/questions/426230/what-is-the-ld-preload-trick).
  * 
  * ## Type-erased CosineSim base class ##
@@ -242,6 +242,8 @@ namespace cosinesim
 #include <memory>
 #include <exception>
 #include <cstring>
+#include <algorithm>  // std::copy
+#include <iterator>  // std::back_inserter
 
 #include "xilinx_apps_common.hpp"
 
@@ -411,7 +413,7 @@ public:
     virtual void *getPopulationVectorBuffer(RowIndex &rowIndex) = 0;
     virtual void finishCurrentPopulationVector(void * pbuf) = 0;
     virtual void finishLoadPopulation() =0;
-    virtual std::vector<Result> matchTargetVector(unsigned numResults, void *elements) = 0;
+    virtual XVector<Result> matchTargetVector(unsigned numResults, void *elements) = 0;
     virtual void cleanGraph() =0;
 };
 /// @endcond
@@ -493,7 +495,10 @@ public:
      * This function is the same as CosineSim::matchTargetVector(), except without the type safety of the array type.
      */
     std::vector<Result> matchTargetVector(unsigned numResults, void *elements) {
-        return pImpl_->matchTargetVector(numResults, elements);
+        XVector<Result> xvResult = pImpl_->matchTargetVector(numResults, elements);
+        std::vector<Result> svResult;
+        std::copy(xvResult.cbegin(), xvResult.cend(), std::back_inserter(svResult));
+        return svResult;
     }
 
 private:

@@ -18,6 +18,8 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
+//#include <regex>
+#include <string>
 #include "ap_int.h"
 #include "xilinx_runtime_common.hpp"
 #include "fuzzymatch.hpp"
@@ -26,24 +28,29 @@
 
 namespace xilinx_apps {
 namespace fuzzymatch {
-    #ifdef DDRBASED
-    const int max_num_of_entries_for_big_tbl = 100*1024*1024;
-    //For DDR-based AWS F1/U200/U250 cards, the maximum batch_num should be 4096*1024
-    const int max_batch_num = 4096*1024;
-    #else
-    const int max_num_of_entries_for_big_tbl = 25*1024*1024;
-    //For U50, each HBM bank is 256MB, the batch_num could be set up to 256*1024.
-    const int max_batch_num = 256*1024;
-    #endif
 
     const int max_fuzzy_len=64;
     class FuzzyMatchImpl {
     public:
         Options options_;  // copy of options passed to FuzzyMatch constructor
-        
+        int max_num_of_entries_for_big_tbl;
+        int max_batch_num;
         FuzzyMatchImpl(const Options &options) : options_(options) 
         {
-            
+            std::string devName = options.deviceNames;
+        //     std::regex u50(".*u50.*");
+        //     std::regex u55(".*u55.*");
+        //    if(std::regex_match(devName,u50) || std::regex_match(devName,u55)) {
+            // Regex was causing crashes in TG, replaced with built-in string search
+            if(devName.find("u50") != std::string::npos || devName.find("u55") != std::string::npos) {
+                max_num_of_entries_for_big_tbl = 25*1024*1024;
+                 //For U50, each HBM bank is 256MB, the batch_num could be set up to 256*1024.
+                max_batch_num = 256*1024;
+            } else {
+                max_num_of_entries_for_big_tbl = 100*1024*1024;
+                //For DDR-based AWS F1/U200/U250 cards, the maximum batch_num should be 4096*1024
+                max_batch_num = 4096*1024;
+            }
         }
         
         std::string xclbinPath;
@@ -59,8 +66,8 @@ namespace fuzzymatch {
         int sum_line;
         std::vector<std::vector<std::string> > vec_pattern_grp =
             std::vector<std::vector<std::string> >(max_len_in_char);
-        std::vector<std::vector<int> > vec_pattern_id = 
-            std::vector<std::vector<int> > (max_len_in_char);
+        std::vector<std::vector<int64_t> > vec_pattern_id = 
+            std::vector<std::vector<int64_t> > (max_len_in_char);
       
         std::vector<int> vec_base ;
         std::vector<int> vec_offset ;
@@ -72,11 +79,11 @@ namespace fuzzymatch {
         int getDevice(const std::string& deviceNames);
         int startFuzzyMatch(const std::string& xclbinPath, const std::string& deviceNames);
 
-        int fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int> vec_id=std::vector<int>());
+        int fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int64_t> vec_id=std::vector<int64_t>());
         
         // batch mode
         // for each string in input_patterns vectors, run fuzzymatch, return maximum top 100 matched results in pair format {id,score} 
-        std::vector<std::vector<std::pair<int,int>>> executefuzzyMatch(std::vector<std::string> input_patterns, int similarity_level);
+        std::vector<std::vector<std::pair<int64_t,int>>> executefuzzyMatch(std::vector<std::string> input_patterns, int similarity_level);
 
         void preCalculateOffsetPerPU(
                     std::vector<std::vector<std::pair<int, std::string> > >& vec_grp_str,
@@ -161,8 +168,14 @@ namespace fuzzymatch {
         std::string curDeviceName;        
         for (uint32_t i = 0; i < totalXilinxDevices; ++i) {
             curDeviceName = devices0[i].getInfo<CL_DEVICE_NAME>();
-    
-            if (deviceNames == curDeviceName || (deviceNames == "azure_u250" && curDeviceName == "xilinx_u250_gen3x16_xdma_shell_2_1")) {
+
+            // the device name on aws-f1 may show up in three forms
+            if ((deviceNames == "u50" && curDeviceName == "xilinx_u50_gen3x16_xdma_201920_3") ||
+                (deviceNames == "u55c" && curDeviceName == "xilinx_u55c_gen3x16_xdma_base_2") ||
+                (deviceNames == "aws-f1" && (curDeviceName == "xilinx_aws-vu9p-f1_dynamic-shell" ||
+                                             curDeviceName == "xilinx_aws-vu9p-f1_shell-v04261818_201920_2" ||
+                                             curDeviceName == "xilinx_aws-vu9p-f1_shell-v04261818_201920_3")) || 
+                (deviceNames == "azure_u250" && curDeviceName == "xilinx_u250_gen3x16_xdma_shell_2_1")) {
                 std::cout << "INFO: Found requested device: " << curDeviceName << " ID=" << i << std::endl;
                 // save the matching device
                 device = devices0[i];
@@ -176,7 +189,11 @@ namespace fuzzymatch {
         return status;
     }
     
-    int FuzzyMatch::startFuzzyMatch(){ return pImpl_->startFuzzyMatch(pImpl_->options_.xclbinPath,pImpl_->options_.deviceNames); }
+    int FuzzyMatch::startFuzzyMatch() 
+    { 
+        return pImpl_->startFuzzyMatch(pImpl_->options_.xclbinPath, pImpl_->options_.deviceNames); 
+    }
+
     int FuzzyMatchImpl::startFuzzyMatch(const std::string &xclbinPath, const std::string& deviceNames)
     {
         if (getDevice(deviceNames) < 0) {
@@ -222,12 +239,12 @@ namespace fuzzymatch {
     
     }
     
-    int FuzzyMatch::fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int> vec_id) 
+    int FuzzyMatch::fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int64_t> vec_id) 
     {
         return pImpl_->fuzzyMatchLoadVec(vec_pattern, vec_id);
     }
     
-    int FuzzyMatchImpl::fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int> vec_id)
+    int FuzzyMatchImpl::fuzzyMatchLoadVec(std::vector<std::string>& vec_pattern,std::vector<int64_t> vec_id)
     {
         std::cout << "INFO: FuzzyMatchImpl::fuzzyMatchLoadVec vec_pattern size=" << vec_pattern.size() << std::endl;
         // check big table size should ot larger than max_num_of_entries_for_big_tbl
@@ -238,6 +255,10 @@ namespace fuzzymatch {
             std::cerr << "Input Pattern vector size should not larger than" << max_num_of_entries_for_big_tbl << "; Please split pattern vector properly and run again" <<std::endl;
             abort();
         }
+        this->vec_pattern_id.clear();
+        this->vec_pattern_id.resize(max_len_in_char);
+        this->vec_pattern_grp.clear();
+        this->vec_pattern_grp.resize(max_len_in_char);
         //group the pattern id
         if(!vec_id.empty()){    
             for (int idx=0; idx < vec_pattern.size(); idx++) {
@@ -250,6 +271,7 @@ namespace fuzzymatch {
                     std::cerr << "ERROR: the string " << vec_pattern[idx] << " length should not larger than" << max_fuzzy_len <<std::endl;
                     abort();
                 }
+                //std::cout << "DEBUG:: vec_pattern:" << vec_pattern[idx] << "; vec_id:"<< vec_id[idx]<<std::endl;
                 vec_pattern_id[len].push_back(vec_id[idx]);
             }
         } else {
@@ -356,13 +378,13 @@ namespace fuzzymatch {
     
 
     //bool FuzzyMatch::executefuzzyMatch(std::string t,int similarity_level)
-    std::vector<std::vector<std::pair<int,int>>> FuzzyMatch::executefuzzyMatch(std::vector<std::string> input_patterns,int similarity_level)  
+    std::vector<std::vector<std::pair<int64_t,int>>> FuzzyMatch::executefuzzyMatch(std::vector<std::string> input_patterns,int similarity_level)  
     { 
         return pImpl_->executefuzzyMatch(input_patterns, similarity_level);
     }
 
     //bool FuzzyMatchImpl::executefuzzyMatch(const std::string& t, int similarity_level)
-    std::vector<std::vector<std::pair<int,int>>> FuzzyMatchImpl::executefuzzyMatch(std::vector<std::string> input_patterns, int similarity_level)
+    std::vector<std::vector<std::pair<int64_t,int>>> FuzzyMatchImpl::executefuzzyMatch(std::vector<std::string> input_patterns, int similarity_level)
     {
         int batch_num = input_patterns.size();
         //check batch_num should not larger than max_batch_num due to memroy size
@@ -460,7 +482,7 @@ namespace fuzzymatch {
         //std::vector<std::vector<int>> results(batch_num); 
         // for each pattern string store top 100 matched patterns. fixed size 201 ints. 
         // 0 th is hit number ; 1..100 is match id; 101..200 is score
-        std::vector<std::vector<std::pair<int,int>>> results(batch_num);
+        std::vector<std::vector<std::pair<int64_t,int>>> results(batch_num);
         for(int bi = 0;bi < batch_num; bi++){
             int i = bi % ((batch_num+1)/2);
             int k = (bi<(batch_num+1)/2) ? 0 :1;

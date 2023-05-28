@@ -1,7 +1,5 @@
 Start AWS EC2 F1 Instances
 **************************
-.. note:: 
-    Currently only Entity Resolution is available on AWS F1.
 
 Amazon EC2 F1 instances use FPGAs to enable delivery of custom hardware accelerations. 
 Follow instructions below to start AWS EC2 F1 instances:

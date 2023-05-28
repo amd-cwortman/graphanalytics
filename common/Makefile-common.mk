@@ -34,6 +34,41 @@ ifndef XILINX_PLATFORMS
 endif
 
 #
+# Global Definitions
+#
+
+# Location of graphanalytics project
+GRAPH_ANALYTICS_DIR = ..
+
+# General output directory for intermediate build artifacts
+BUILD_DIR = build
+
+
+#######################################################################################################################
+#
+# Staging
+#
+
+STAGE_DIR = staging
+
+# Files to be direct-copied from source tree to staging area
+
+STAGE_COPY_COMMON_FILE_SOURCES = \
+    common/include/xilinx_apps_loader.hpp \
+    ext/xilinx_apps_common.hpp
+
+STAGE_COPY_COMMON_FILES = $(addprefix $(STAGE_DIR)/include/,$(notdir $(STAGE_COPY_COMMON_FILE_SOURCES)))
+
+define STAGE_COPY_COMMON_RULE
+$(2): $(1)
+	cp -f $(1) $(2)
+endef
+$(foreach f,$(STAGE_COPY_COMMON_FILE_SOURCES),$(eval $(call STAGE_COPY_COMMON_RULE,$(GRAPH_ANALYTICS_DIR)/$(f),$(STAGE_DIR)/include/$(notdir $(f)))))
+
+
+#######################################################################################################################
+
+#
 # Packaging
 #
 OSDIST = $(shell lsb_release -si)
@@ -51,34 +86,34 @@ else ifeq ($(OSDIST),CentOS)
 	OSDISTLC = centos
 endif
 
-# DIST_RELEASE = 1: release the package to amd-graphanalytics-install area
+# DIST_RELEASE = 1: release the package to amd-agml-install area
 DIST_RELEASE = 0
 
 ARCH = $(shell uname -p)
-CPACK_PACKAGE_FILE_NAME= xilinx-$(STANDALONE_NAME)-$(PRODUCT_VER)_$(OSVER)-$(ARCH).$(DIST_TARGET)
-DIST_INSTALL_DIR = $(GRAPH_ANALYTICS_DIR)/scripts/amd-graphanalytics-install/$(OSDISTLC)-$(OSVER_DIR)/$(STANDALONE_NAME)
+CPACK_PACKAGE_FILE_NAME= amd-$(STANDALONE_NAME)-$(PRODUCT_VER)_$(OSVER)-$(ARCH).$(DIST_TARGET)
+DIST_INSTALL_DIR = $(abspath $(GRAPH_ANALYTICS_DIR)/scripts/amd-agml-install/$(OSDISTLC)-$(OSVER_DIR)/$(STANDALONE_NAME))
 
 .PHONY: dist
 
 dist: stage
-	@if [ $(DIST_RELEASE) == 1 ]; then \
+	if [[ $(DIST_RELEASE) == 1 ]]; then \
 		echo "INFO: Removing previous versions of the package and vclf"; \
-		git rm -f $(DIST_INSTALL_DIR)/xilinx-$(STANDALONE_NAME)-?.*.$(DIST_TARGET).vclf; \
-        rm     -f $(DIST_INSTALL_DIR)/xilinx-$(STANDALONE_NAME)-?.*.$(DIST_TARGET); \
+		git rm -f --ignore-unmatch $(DIST_INSTALL_DIR)/*-$(STANDALONE_NAME)-?.*.$(DIST_TARGET).vclf; \
+        rm -f $(DIST_INSTALL_DIR)/*-$(STANDALONE_NAME)-?.*.$(DIST_TARGET); \
 	fi
 
-	@if [ "$(DIST_TARGET)" == "" ]; then \
+	@if [[ "$(DIST_TARGET)" == "" ]]; then \
 	    echo "INFO: Packaging is supported for only Ubuntu and CentOS."; \
 	else \
 	    echo "Packaging $(DIST_TARGET) for $(OSDIST)"; \
 	    cd package; \
 		make ; \
 		cd - ; \
-		cp -f ./package/$(CPACK_PACKAGE_FILE_NAME) $(DIST_INSTALL_DIR)/; \
-		echo "INFO: Package file saved as $(DIST_INSTALL_DIR)/$(CPACK_PACKAGE_FILE_NAME)"; \
 	fi
 
-	@if [ $(DIST_RELEASE) == 1 ]; then \
+	@if [[ $(DIST_RELEASE) == 1 ]]; then \
+		cp -f ./package/$(CPACK_PACKAGE_FILE_NAME) $(DIST_INSTALL_DIR)/; \
+		echo "INFO: Package file saved as $(DIST_INSTALL_DIR)/$(CPACK_PACKAGE_FILE_NAME)"; \
 		echo "INFO: Adding new package to vclf"; \
 		vclf add $(DIST_INSTALL_DIR)/$(CPACK_PACKAGE_FILE_NAME); \
 	fi

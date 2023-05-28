@@ -22,10 +22,9 @@ help-common:
 	@echo "Makefile usage:"
 	@echo "make install-plugin [deviceNames=deviceNames] [sshKey=ssh-key-file]"
 	@echo "    Supported deviceNames:"
-	@echo "    xilinx_u50_gen3x16_xdma_201920_3"
-	@echo "    xilinx_u55c_gen3x16_xdma_base_2"
-	
-
+	@echo "      u50"
+	@echo "      u55c"
+	@echo "      aws-f1"
 	@echo "Parameter descriptions:"
 	@echo ""
 	@echo "sshKey            : SSH key for user tigergraph"	

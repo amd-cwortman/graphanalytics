@@ -65,8 +65,6 @@ if [ "$compile_mode" -eq 1 ]; then
     gsql -u $username -p $password -g $xgraph "$(cat $script_dir/../query/build_edges.gsql | sed "s/@graph/$xgraph/")"
     echo "Running build_edges()"
     time gsql -u $username -p $password -g $xgraph "run query build_edges()"
-    echo "Waiting for Graph to stabilize..."
-    sleep 90
 fi
 
 if [ "$compile_mode" -eq 1 ] || [ "$compile_mode" -eq 2 ]; then

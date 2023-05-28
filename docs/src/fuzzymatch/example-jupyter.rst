@@ -12,7 +12,7 @@ Run following commands in the Python virtual environment (from setup) to run the
 
 .. code-block:: bash
 
-    (fpga)$ cp -r /opt/xilinx/apps/graphanalytics/fuzzymatch/%MIS_VERSION/examples fuzzymatch-examples
+    (fpga)$ cp -r /opt/amd/apps/agml/fuzzymatch/%MIS_VERSION/examples fuzzymatch-examples
     (fpga)$ cd fuzzymatch-examples/python
     (fpga)$ ./run.sh jupyter notebook jupyter/fuzzymatch_demo_notebook.ipynb
 

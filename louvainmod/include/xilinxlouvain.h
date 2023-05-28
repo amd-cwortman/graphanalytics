@@ -47,7 +47,8 @@ enum {
     //LOUVAINMOD_OPT_KERNEL = 1,
     LOUVAINMOD_PRUNING_KERNEL = 2,
     LOUVAINMOD_RENUM_KERNEL = 3,
-    LOUVAINMOD_2CU_U55C_KERNEL = 4
+    LOUVAINMOD_2CU_U55C_KERNEL = 4,
+    LOUVAINMOD_2CU_DDR_KERNEL = 5,
 };
 
 enum {
@@ -184,6 +185,7 @@ public:
         const long* drglist_tg = nullptr;
         long start_vertex = 0;
         long end_vertex = 0;  // one vertex ID BEYOND the last vertex of the server partition
+        long NV_par_max = 64*1000*1000;  // Requested max NV per partition. Default to U50 max NV per card = glb_MAXNV_M
         long NV_par_requested = 0;  // Requested NV per partition.  Leave as 0 to calculate from num Alveo cards on each server
         int nodeId = -1;  // Node ID for the server, or -1 to use Options::nodeId
         bool isWholeGraph = false;  // set to true if this server partition is the whole graph

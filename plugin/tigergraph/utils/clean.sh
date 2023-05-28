@@ -1,5 +1,7 @@
 #!/usr/bin/env bash 
 
+#set -x
+
 SCRIPT=$(readlink -f $0)
 script_dir=`dirname $SCRIPT`
 
@@ -39,9 +41,30 @@ fi
 tg_app_root=$(cat $HOME/.tg.cfg | jq .System.AppRoot | tr -d \")
 tg_temp_root=$(cat $HOME/.tg.cfg | jq .System.TempRoot | tr -d \")
 tg_data_root=$(cat $HOME/.tg.cfg | jq .System.DataRoot | tr -d \")
+tg_log_root=$(cat $HOME/.tg.cfg | jq .System.LogRoot | tr -d \")
 
 # set up PATH for tigergraph commands
 export PATH=$tg_root_dir/../cmd:$PATH
+
+#
+# Clean the TG configuration
+#
+
+echo "INFO: Cleaning TigerGraph configuration..."
+gadmin config set GPE.BasicConfig.Env 'LD_PRELOAD=$LD_PRELOAD; LD_LIBRARY_PATH=$LD_LIBRARY_PATH; CPUPROFILE=/tmp/tg_cpu_profiler; CPUPROFILESIGNAL=12; MALLOC_CONF=prof:true,prof_active:false'
+gadmin config apply -y
+
+
+#
+# Clean the TG database
+#
+
+if [ $doDropAll -eq 1 ]; then
+    echo "INFO: Dropping all items from TigerGraph database..."
+    gsql drop all
+else
+    echo "INFO: Skipping drop all"
+fi
 
 #
 # Clean ExprFunctions.hpp
@@ -74,17 +97,6 @@ else
 fi
 
 #
-# Clean the TG database
-#
-
-if [ $doDropAll -eq 1 ]; then
-    echo "INFO: Dropping all items from TigerGraph database..."
-    gsql drop all
-else
-    echo "INFO: Skipping drop all"
-fi
-
-#
 # Clean out UDF .so's
 #
 
@@ -94,5 +106,22 @@ rm -rf \
     $tg_app_root/dev/gdk/objs/gq_*.o \
     $tg_temp_root/gsql/codegen/QueryUdf/* \
     $tg_app_root/dev/gdk/gsql/.tmp/codeGen/* 
+
+#
+# Create a temporary graph and drop it to prevent "Can not refresh graph schema" problem
+#
+
+gpeLog=$tg_log_root/gpe/GPE_1\#1.out
+if [ -f $gpeLog ]; then
+    echo "INFO: Checking for GPE \"Can not refresh graph schema\" problem..."
+    sleep 2
+    if [ $(tail $gpeLog | grep -c "Can not refresh graph schema") -gt 0 ]; then
+        echo "INFO: Problem detected.  Creating and dropping temp graph..."
+        gsql "create graph temp()"
+        gsql "drop graph temp"
+    else
+        echo "INFO: Problem NOT detected."
+    fi
+fi
 
 echo "INFO: Done"

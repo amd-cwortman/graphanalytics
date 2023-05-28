@@ -13,5 +13,5 @@ Optimization product as a TigerGraph plugin:
     Deploy Alveo card <deploy-alveo.rst>
     Install TigerGraph <install-tigergraph.rst>
     Install Python Virtual Environment (PyTigerGraph users ONLY) <install-conda-python.rst>  
-    Install Supply Chain Optimization Product <../mis-tg/install.rst>
+    Install AGML Plugin for TigerGraph <../common/install-agml.rst>
     Run Demo <../mis-tg/usecases-travelplan.rst>

@@ -17,7 +17,7 @@ TigerGraph 3.x via plugins and UDFs.
 
     (fpga)$ mkdir recomengine-example
     (fpga)$ cd recomengine-example
-    (fpga)$ cp -r /opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/recomengine/%RECOMENGINE_TG_VERSION/examples .
+    (fpga)$ cp -r /opt/amd/apps/agml/integration/Tigergraph-3.x/agml/%PACKAGE_VERSION/recomengine/examples .
 
 
 3. Install demo specific plugin
@@ -29,7 +29,6 @@ TigerGraph 3.x via plugins and UDFs.
     :maxdepth: 1
 
     ../common/setup-demo-plugin.rst
-
 
 4. Follow instructions in the Demo use cases pages to run the corresponding Notebooks
 -------------------------------

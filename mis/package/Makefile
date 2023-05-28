@@ -25,7 +25,7 @@ endif
 
 package: $(PKGDIR)
 	cd $(PKGDIR); \
-	cmake -DCMAKE_BUILD_TYPE=Release -DPROD_VERSION=${PROD_VERSION} -DCMAKE_INSTALL_PREFIX=/opt/xilinx/apps/graphanalytics/  ..;\
+	cmake -DCMAKE_BUILD_TYPE=Release -DPROD_VERSION=${PROD_VERSION} -DCMAKE_INSTALL_PREFIX=/opt/amd/apps/agml/  ..;\
 	cmake --build .;\
 	cpack -B $(shell pwd) ; \
 	cd ..; \

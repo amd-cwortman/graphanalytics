@@ -1221,8 +1221,6 @@ GLV* SttGPar::ParNewGlv_Prun(graphNew* G, long st, long ed, int& id_glv, int th_
     GetGFromEdge(Gnew, elist, num_v, num_e_dir);
     glv->SetByOhterG(Gnew);
     glv->SetM(M_v);
-    // printG(Gnew);
-    // FreeG(Gnew);
     free(elist);
     free(M_v);
     return glv;

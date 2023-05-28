@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Xilinx, Inc
+# Copyright (C) 2021-2022 Xilinx, Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License"). You may
 # not use this file except in compliance with the License. A copy of the
@@ -13,7 +13,7 @@
 # under the License.
 
 cmake_minimum_required(VERSION 2.8.11)
-project(xilinx-fuzzymatch)
+project(amd-fuzzymatch)
 
 # Linking variables
 set (CMAKE_CXX_STANDARD 14)
@@ -23,9 +23,7 @@ set(CS_FILE_PATH "${CMAKE_SOURCE_DIR}/../staging/")
 set(CMAKE_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/fuzzymatch/${PROD_VERSION}")
 install(DIRECTORY "${CS_FILE_PATH}/lib/" DESTINATION ${CMAKE_INSTALL_PATH}/lib USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${CS_FILE_PATH}/xclbin/" DESTINATION ${CMAKE_INSTALL_PATH}/xclbin)
-
-install(FILES "${CS_FILE_PATH}/include/fuzzymatch.hpp" DESTINATION ${CMAKE_INSTALL_PATH}/include)
-install(FILES "${CS_FILE_PATH}/include/xilinx_apps_common.hpp" DESTINATION ${CMAKE_INSTALL_PATH}/include)
+install(DIRECTORY "${CS_FILE_PATH}/include/" DESTINATION ${CMAKE_INSTALL_PATH}/include USE_SOURCE_PERMISSIONS)
 
 install(FILES "${CS_FILE_PATH}/src/fuzzymatch_loader.cpp" DESTINATION ${CMAKE_INSTALL_PATH}/src)
 install(FILES "${CS_FILE_PATH}/src/fuzzymatch_utils.cpp" DESTINATION ${CMAKE_INSTALL_PATH}/src)
@@ -35,7 +33,7 @@ install(FILES "${CS_FILE_PATH}/VERSION" DESTINATION ${CMAKE_INSTALL_PATH}/ )
 
 #version 
 
-set(CPACK_PACKAGE_NAME "xilinx-fuzzymatch-${PROD_VERSION}")
+set(CPACK_PACKAGE_NAME "amd-fuzzymatch-${PROD_VERSION}")
 set(CPACK_PACKAGE_VERSION "1.0.0")
 
 # --- LSB Release ---
@@ -85,8 +83,8 @@ set(CPACK_RPM_SPEC_MORE_DEFINE "%define __python python3")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "xrt (>= 2.8.0),xrm (>= 1.2.0),python3")
 #set(CPACK_DEBIAN_PACKAGE_DEPENDS "xrt (>= 2.8.0),xrm (>= 1.2.0),python3 (>= 3.6)")
 set(CPACK_RPM_PACKAGE_DEPENDS "xrt (>= 2.8.0), xrm (>= 1.2.0),python3 (>= 3.6)")
-set(CPACK_PACKAGE_CONTACT "Xilinx Fuzzymatch Development Team")
-set(CPACK_PACKAGE_VENDOR "Xilinx")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Xilinx Fuzzymatch Acceleration")
-set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/opt" "/opt/xilinx" "/usr/lib64" "/opt/xilinx/apps" "/opt/xilinx/apps/graphanalytics"  )
+set(CPACK_PACKAGE_CONTACT "AMD AGML Development Team")
+set(CPACK_PACKAGE_VENDOR "AMD")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "AMD Fuzzymatch Acceleration")
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/opt" "/opt/amd" "/usr/lib64" "/opt/amd/apps" "/opt/amd/apps/agml"  )
 include(CPack)

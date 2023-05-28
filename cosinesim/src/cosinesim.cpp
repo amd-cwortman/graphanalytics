@@ -36,12 +36,13 @@ class PrivateImpl : public ImplBase {
 public:
     unsigned indexDeviceCuNm, indexSplitNm, indexNumVertices;
     unsigned numPUs_ = 3;    // number of partitions based on number of PUs
-    const unsigned channelsPU = 4; // each PU has 4 HBM channels
-    const unsigned cuNm = 2;       // TODO
-    const unsigned channelW = 16;
+    const unsigned channelsPU = 4; // HBM and DDR: each PU has 4 HBM channels
+    unsigned cuNm = 2;       // HBM
+    unsigned channelW = 16; //HBM
 
     int valueSize_;
     uint32_t numDevices;
+    XString shortDeviceNames;
     XString deviceNames;
     int populationVectorRowNm;
     int32_t** numVerticesPU ; // vertex numbers in each PU
@@ -105,32 +106,46 @@ public:
         if (options.numDevices > 0)
             numDevices = options.numDevices;
 
-        deviceNames = options.deviceNames;
+        shortDeviceNames = options.deviceNames;
         // default xclbin to load
-        if (deviceNames == XString("xilinx_u50_gen3x16_xdma_201920_3")) {
+        if (shortDeviceNames == XString("u50")) {
+            deviceNames = "xilinx_u50_gen3x16_xdma_201920_3";
             xclbinPath = std::string("/opt/xilinx/apps/graphanalytics/cosinesim/") + std::string(VERSION) + 
                          std::string("/xclbin/cosinesim_32bit_xilinx_u50_gen3x16_xdma_201920_3.xclbin");
             kernelName_ = "denseSimilarityKernel";
             kernelAlias_ = "denseSimilarityKernel_U50";
             numPUs_ = 3;
-        } else if (deviceNames == XString("xilinx_u55c_gen3x16_xdma_base_2")) {
+        } else if (shortDeviceNames == XString("u55c")) {
+            deviceNames = "xilinx_u55c_gen3x16_xdma_base_2";
             xclbinPath = std::string("/opt/xilinx/apps/graphanalytics/cosinesim/") + std::string(VERSION) + 
                          std::string("/xclbin/cosinesim_32bit_4pu_xilinx_u55c_gen3x16_xdma_base_2.xclbin");
             kernelName_ = "denseSimilarityKernel4PU";
             kernelAlias_ = "denseSimilarityKernel4PU_U55C";
             numPUs_ = 4;
-        } else if (deviceNames == XString("xilinx_aws-vu9p-f1_shell-v04261818_201920_2")) {
-            xclbinPath = std::string("/opt/xilinx/apps/graphanalytics/cosinesim/") + std::string(VERSION) + 
+        } else if (shortDeviceNames == XString("aws-f1")) {
+            deviceNames = "xilinx_aws-vu9p-f1_shell-v04261818_201920_2 xilinx_aws-vu9p-f1_shell-v04261818_201920_3 xilinx_aws-vu9p-f1_dynamic-shell";
+	    xclbinPath = std::string("/opt/xilinx/apps/graphanalytics/cosinesim/") + std::string(VERSION) + 
                          std::string("/xclbin/cosinesim_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin");
             kernelName_ = "denseSimilarityKernel";
             //kernelAlias_ = "denseSimilarityKernel_F1";
             numPUs_ = 1;
+            cuNm = 1;
+            channelW = 8;
+        } else if (shortDeviceNames == XString("u200")) {
+            deviceNames = "xilinx_u200_gen3x16_xdma_base_2";
+            xclbinPath = std::string("/opt/xilinx/apps/graphanalytics/cosinesim/") + std::string(VERSION) + 
+                         std::string("/xclbin/cosinesim_xilinx_u200_gen3x16_xdma_2_202110_1.xclbin");
+            kernelName_ = "denseSimilarityKernel";
+            //kernelAlias_ = "denseSimilarityKernel_F1";
+            numPUs_ = 1;
+            cuNm = 1;
+            channelW = 8;
         } else {
-            std::cout << "DEBUG: deviceNames " << deviceNames << " is not supported" << std::endl;
+            std::cout << "DEBUG: deviceNames " << shortDeviceNames << " is not supported" << std::endl;
             std::ostringstream oss;
-            oss << "Supported deviceNames: xilinx_u50_gen3x16_xdma_201920_3 and xilinx_u55c_gen3x16_xdma_base_2" <<std::endl;
+            oss << "INFO: Supported deviceNames: u50, u55c,aws-f1 and u200" <<std::endl;
             throw xilinx_apps::cosinesim::Exception(oss.str());
-            std::cerr << "ERROR: deviceNames " << deviceNames << " not supported" <<std::endl;
+            std::cerr << "ERROR: deviceNames " << shortDeviceNames << " not supported" <<std::endl;
             abort();
         }
 
@@ -158,11 +173,7 @@ public:
         g.resize(numDevices*cuNm);
         // g = new xf::graph::Graph<int32_t, int32_t>*[devicesNeeded * cuNm];
 
-
-
         load_cu_cosinesim_ss_dense_fpga();
-
-
     }
 
     ~PrivateImpl(){
@@ -365,13 +376,13 @@ public:
         return eventQueue;
     };
 
-    virtual std::vector<Result> matchTargetVector(unsigned numResults, void *elements){
+    virtual XVector<Result> matchTargetVector(unsigned numResults, void *elements){
         // Don't allow more results to be returned than the number of population vectors.  The kernel would return
         // blank results (index and similarity 0) in that case, so we need to prevent it here.
         if (numResults > this->numVertices)
             numResults = this->numVertices;
         
-        std::vector<Result> result;
+        XVector<Result> result;
         //---------------- Generate Source Indice and Weight Array -------
         int sourceLen = edgeAlign8; // sourceIndice array length
         int32_t* sourceFeatures = xf::graph::internal::aligned_alloc<int32_t>(sourceLen); // values of features in source

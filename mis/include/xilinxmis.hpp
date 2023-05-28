@@ -41,16 +41,16 @@
 namespace xilinx_apps {
 namespace mis {
 struct Options;
-class MisImpl;
+class ImplBase;
 }
 }
 
 extern "C" {
 XILINX_MIS_IMPL_DECL
-xilinx_apps::mis::MisImpl* xilinx_mis_createImpl(const xilinx_apps::mis::Options& options);
+xilinx_apps::mis::ImplBase* xilinx_mis_createImpl(const xilinx_apps::mis::Options& options);
 
 XILINX_MIS_IMPL_DECL
-void xilinx_mis_destroyImpl(xilinx_apps::mis::MisImpl* pImpl);
+void xilinx_mis_destroyImpl(xilinx_apps::mis::ImplBase* pImpl);
 }
 
 namespace xilinx_apps {
@@ -58,24 +58,29 @@ namespace mis {
 
 // GraphCSR format class
 class GraphCSR {
+    std::vector<int> rowPtrVec;
+    std::vector<int> colIdxVec;
    public:
     int n;
-    std::vector<int> rowPtr;
-    std::vector<int> colIdx;
+    int* rowPtr = nullptr;
+    int* colIdx = nullptr;
     int rowPtrSize;
     int colIdxSize;
 
-    GraphCSR(const std::vector<int>& rowPtr, const std::vector<int>& colIdx) : rowPtr(rowPtr), colIdx(colIdx) {
-        rowPtrSize = rowPtr.size();
-        colIdxSize = colIdx.size();
-        n = rowPtr.size() - 1;
+    GraphCSR(const std::vector<int>& rowPtrVec, const std::vector<int>& colIdxVec)
+    : rowPtrVec(rowPtrVec), colIdxVec(colIdxVec), rowPtr(this->rowPtrVec.data()), colIdx(this->colIdxVec.data()) {
+        rowPtrSize = rowPtrVec.size();
+        colIdxSize = colIdxVec.size();
+        n = rowPtrVec.size() - 1;
     }
 
-    GraphCSR(std::vector<int>&& rowPtr, std::vector<int>&& colIdx)
-        : rowPtr(std::move(rowPtr)), colIdx(std::move(colIdx)) {
-        rowPtrSize = this->rowPtr.size();
-        colIdxSize = this->colIdx.size();
-        n = this->rowPtr.size() - 1;
+    GraphCSR(std::vector<int>&& rowPtrVec, std::vector<int>&& colIdxVec)
+        : rowPtrVec(std::move(rowPtrVec)), colIdxVec(std::move(colIdxVec)), rowPtr(this->rowPtrVec.data()),
+          colIdx(this->colIdxVec.data())
+    {
+        rowPtrSize = this->rowPtrVec.size();
+        colIdxSize = this->colIdxVec.size();
+        n = this->rowPtrVec.size() - 1;
     }
 
     void isolateVertex(const std::vector<int>& vertices) {
@@ -84,20 +89,21 @@ class GraphCSR {
 
         int cstart = 0, validPos = 0;
         for (int r = 0; r < n; r++) {
-            int cstop = rowPtr[r + 1];
+            int cstop = rowPtrVec[r + 1];
             if (valid[r]) {
                 for (int c = cstart; c < cstop; c++) {
-                    int cId = colIdx[c];
+                    int cId = colIdxVec[c];
                     if (valid[cId]) {
-                        colIdx[validPos++] = cId;
+                        colIdxVec[validPos++] = cId;
                     }
                 }
             }
             cstart = cstop;
-            rowPtr[r + 1] = validPos;
+            rowPtrVec[r + 1] = validPos;
         }
-        colIdx.resize(validPos);
+        colIdxVec.resize(validPos);
         colIdxSize = validPos;
+        colIdx = colIdxVec.data();  // in case raw byte buffer is moved in memory during resize
     }
 };
 
@@ -132,6 +138,18 @@ struct Options {
     XString xclbinPath;
     XString deviceNames;
 };
+
+
+class ImplBase {
+   public:
+    virtual ~ImplBase(){};
+    virtual void startMis() = 0;
+    virtual void setGraph(const GraphCSR* graph) = 0;
+    virtual XVector<XVector<int>> executeMIS(int iter) = 0;
+    virtual size_t count() const = 0;
+};
+
+
 /*
 template <typename T>
 using host_buffer_t = std::vector<T, aligned_allocator<T> >;
@@ -143,15 +161,15 @@ class MIS {
     ~MIS() { xilinx_mis_destroyImpl(pImpl_); }
 
     // The intialize process will download FPGA binary to FPGA card
-    void startMis();
+    void startMis() { pImpl_->startMis(); }
     // set the graph and internal pre-process the graph
-    void setGraph(GraphCSR* graph);
-    std::vector<std::vector<int> > executeMIS(int iter = 1);
+    void setGraph(const GraphCSR* graph) { pImpl_->setGraph(graph); }
+    xilinx_apps::XVector<xilinx_apps::XVector<int> > executeMIS(int iter = 1) { return pImpl_->executeMIS(iter); }
     // void evict(const std::vector<int>&);
-    size_t count() const;
+    size_t count() const { return pImpl_->count(); }
 
    private:
-    MisImpl* pImpl_ = nullptr;
+    ImplBase* pImpl_ = nullptr;
 };
 
 } // namespace mis

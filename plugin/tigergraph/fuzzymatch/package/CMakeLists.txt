@@ -13,7 +13,7 @@
 # under the License.
 
 cmake_minimum_required(VERSION 2.8.11)
-project(xilinx-fuzzymatch-tigergraph)
+project(amd-fuzzymatch-tigergraph)
 
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 # Linking variables
@@ -28,7 +28,7 @@ install(DIRECTORY "${PROJ_FILE_PATH}/udf" DESTINATION ${CMAKE_INSTALL_PATH}/ USE
 install(PROGRAMS "${PROJ_FILE_PATH}/install.sh" DESTINATION ${CMAKE_INSTALL_PATH}/ )
 install(FILES "${PROJ_FILE_PATH}/VERSION" DESTINATION ${CMAKE_INSTALL_PATH}/ )
 
-set(CPACK_PACKAGE_NAME "xilinx-fuzzymatch-tigergraph-${PROD_VERSION}")
+set(CPACK_PACKAGE_NAME "amd-fuzzymatch-tigergraph-${PROD_VERSION}")
 set(CPACK_PACKAGE_VERSION "1.0.0")
 
 
@@ -70,7 +70,7 @@ elseif (${LINUX_FLAVOR} MATCHES "^(RedHat|CentOS|Amazon)")
 
 endif()
 
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_REL_VER}-${CPACK_ARCH}")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_REL_VER}-${CPACK_ARCH}")
 
 message("-- ${CMAKE_BUILD_TYPE} ${PACKAGE_KIND} package")
 set(CPACK_RPM_SPEC_MORE_DEFINE "%define __python python3")
@@ -78,8 +78,8 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "xrt (>= 2.8.0),xrm (>= 1.2.0),python3")
 set(CPACK_RPM_PACKAGE_DEPENDS "xrt (>= 2.8.0), xrm (>= 1.2.0),python3 (>= 3.6.0)")
 
 set(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/rpmpreinst")
-set(CPACK_PACKAGE_CONTACT "Xilinx Fuzzymatch Development Team")
-set(CPACK_PACKAGE_VENDOR "Xilinx")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Xilinx Fuzzymatch Engine for tigergraph plugin ")
-set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/opt" "/opt/xilinx" "/usr/lib64" "/opt/xilinx/apps" "/opt/xilinx/apps/graphanalytics")
+set(CPACK_PACKAGE_CONTACT "AMD AGML Development Team")
+set(CPACK_PACKAGE_VENDOR "AMD")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "AMD AGML Fuzzymatch Engine plugin for Tigergraph")
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/opt" "/opt/xilinx" "/usr/lib64" "/opt/amd/apps" "/opt/amd/apps/agml")
 include(CPack)

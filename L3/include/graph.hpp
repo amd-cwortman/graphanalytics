@@ -77,8 +77,10 @@ T* aligned_alloc(std::size_t num) {
     ptr = (T*)malloc(num * sizeof(T));
     if (num == 0) {
 #else
-    if (posix_memalign(&ptr, 4096, num * sizeof(T))) {
+    auto errCode = posix_memalign(&ptr, 4096, num * sizeof(T));
+    if (errCode != 0) {
 #endif
+        std::cout << "DEBUG: posix_memalign returned " << errCode << std::endl;
         throw std::bad_alloc();
     }
     return reinterpret_cast<T*>(ptr);

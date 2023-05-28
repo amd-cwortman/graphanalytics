@@ -9,7 +9,7 @@ Running Entity Resolution Using GSQL Client
   .. code-block:: bash
 
     # Copy examples from the installation to your own working directory mis-examples
-    cp -r /opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/fuzzymatch/%FUZZYMATCH_TG_VERSION/examples fuzzymatch-examples
+    cp -r /opt/amd/apps/agml/integration/Tigergraph-3.x/agml/%PACKAGE_VERSION/fuzzymatch/examples fuzzymatch-examples
 
     cd fuzzymatch-examples/entity-resolution
     

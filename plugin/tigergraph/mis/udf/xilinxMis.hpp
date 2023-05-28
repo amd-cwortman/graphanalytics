@@ -104,7 +104,7 @@ inline ListAccum<ListAccum<VERTEX> > udf_xilinx_mis(int num_schedules, int num_v
     context->setMisGraph();
 
     // execute MIS
-    std::vector<std::vector<int> > schedules = pMis->executeMIS(num_schedules);
+    auto schedules = pMis->executeMIS(num_schedules);
 
     // collect results into TG accumulator
     for (int i = 0; i < schedules.size(); i++ ) {

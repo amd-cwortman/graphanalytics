@@ -15,7 +15,7 @@
 PKGDIR := PKG_Release
 RM := rm -rf
 PLUGIN := Tigergraph-3.x/recomengine
-PROD_VERSION := $(strip $(shell cat ../staging/VERSION))
+PROD_VERSION := $(strip $(shell cat ../VERSION))
 
 OSDIST = $(shell lsb_release -si)
 ifeq ($(OSDIST),Ubuntu)
@@ -26,9 +26,9 @@ endif
 
 package: $(PKGDIR)
 	cd $(PKGDIR); \
-	cmake -DCMAKE_BUILD_TYPE=Release -DPROD_VERSION=${PROD_VERSION} -DCMAKE_INSTALL_PREFIX=/opt/xilinx/apps/graphanalytics/integration/${PLUGIN}  ..;\
-	cmake --build .;\
-	cpack -B $(shell pwd) ; \
+	cmake -Wno-dev -DCMAKE_BUILD_TYPE=Release -DPROD_VERSION=${PROD_VERSION} -DCMAKE_INSTALL_PREFIX=/opt/amd/apps/agml/integration/${PLUGIN}  ..;\
+	cmake -Wno-dev --build .;\
+	cpack -Wno-dev -B $(shell pwd) ; \
 	cd ..; \
 	rm ${PKGDIR} -r; 
 

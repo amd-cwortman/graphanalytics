@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
+deviceNames=u50
 refNames=$(CURDIR)/data/ref-names.csv
 refNamesCSV=$(abspath $(refNames))
 newNames=$(CURDIR)/data/new-names.csv
@@ -22,11 +22,17 @@ graphName=entity_resolution_$(USER)
 
 compileMode=1
 runMode=2
+printResult=0
 INC_ALL_XCLBINS=1
 
 ifdef sshKey
     SSH_KEY_OPT=-i $(sshKey)
 endif	
+
+ifeq ($(printResult),1) 
+	RUN_OPTIONS += -l 
+endif	
+
 
 STANDALONE_NAME = fuzzymatch
 EXAMPLE=entity-resolution
@@ -77,7 +83,7 @@ run: $(EXAMPLE_UDF_TARGET)
 	cd ../../ && make DEBUG=$(DEBUG) stage && \
 	    ./staging/examples/$(EXAMPLE)/bin/run.sh -v \
 	    -g $(graphName) -s $(refNamesCSV) -t $(newNamesCSV) \
-		-c $(compileMode) -r $(runMode) 
+		-c $(compileMode) -r $(runMode) $(RUN_OPTIONS)
 
 help:
 	@echo "Makefile usage:"
@@ -90,9 +96,9 @@ help:
 	@echo ""
 	@echo "Parameter descriptions:"
 	@echo "deviceNames : Target device name. Supported devices: "
-	@echo "              xilinx_u50_gen3x16_xdma_201920_3 (default)"
-	@echo "              xilinx_aws-vu9p-f1_shell-v04261818_201920_2"
-	@echo "              xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "                u50 (default)"
+	@echo "                u55c"
+	@echo "                aws-f1"
 	@echo "refNames    : A csv file with reference names. default=../data/ref-names.csv"
 	@echo "newNames    : A csv file with new names. default=../data/new-names.csv"
 	@echo "graphName   : graph name (default=swift_<username>"
@@ -103,6 +109,8 @@ help:
 	@echo "              1: Run only on CPU"
 	@echo "              2: Run only on Alveo (default)"
 	@echo "              3: Run on both CPU and Alveo"
+	@echo "printResult : 0: Do NOT print detailed results to JSON output"
+	@echo "              1: Print detailed results to JSON output"
 	@echo ""
 	@echo "sshKey      : SSH key for user tigergraph"	
 	@echo "INC_ALL_XCLBINS : 1: Include all supported XCLBINs for staging"

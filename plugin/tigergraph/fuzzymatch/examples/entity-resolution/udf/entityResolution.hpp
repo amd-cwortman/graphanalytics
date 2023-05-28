@@ -18,17 +18,17 @@
 #ifndef ENTITY_RESOLUTION_HPP
 #define ENTITY_RESOLUTION_HPP
 
-// mergeHeaders 1 name entityResolution
+// mergeHeaders 1 name entityResolutionDemo
 
-// mergeHeaders 1 section include start entityResolution DO NOT REMOVE!
+// mergeHeaders 1 section include start entityResolutionDemo DO NOT REMOVE!
 #include "entityResolutionImpl.hpp"
-// mergeHeaders 1 section include end entityResolution DO NOT REMOVE!
+// mergeHeaders 1 section include end entityResolutionDemo DO NOT REMOVE!
 
 //#####################################################################################################################
 
 namespace UDIMPL {
 
-// mergeHeaders 1 section body start entityResolution DO NOT REMOVE!
+// mergeHeaders 1 section body start entityResolutionDemo DO NOT REMOVE!
 
 inline bool concat_uint64_to_str(string& ret_val, uint64_t val) {
     (ret_val += " ") += std::to_string(val);
@@ -168,7 +168,7 @@ inline int udf_fuzzymatch_cpu(ListAccum<string> sourceList, ListAccum<string> ta
     return execTime;
 }
 
-// mergeHeaders 1 section body end entityResolution DO NOT REMOVE!
+// mergeHeaders 1 section body end entityResolutionDemo DO NOT REMOVE!
 
 }  // namespace UDIMPL
 #endif

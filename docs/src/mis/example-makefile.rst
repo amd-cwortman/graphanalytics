@@ -7,7 +7,7 @@ C++ Example using Makefile
 
     .. code-block:: bash
 
-        cp -r /opt/xilinx/apps/graphanalytics/mis/%MIS_VERSION/examples mis-examples
+        cp -r /opt/amd/apps/agml/mis/%MIS_VERSION/examples mis-examples
         cd mis-examples/cpp
     
         # Print makefile usage and options
@@ -17,4 +17,4 @@ C++ Example using Makefile
         make run
     
         # Run the demo on U55C Alveo card
-        make run deviceNames=xilinx_u55c_gen3x16_xdma_base_2
+        make run deviceNames=u55c

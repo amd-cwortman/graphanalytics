@@ -141,7 +141,10 @@ CREATE QUERY tg_prenumbered_partition(
 {
     STRING gName = "@graph" ;
     MapAccum<UINT,INT> @@nodeAccum;
-    
+    INT ret;
+    EXCEPTION tgPrenumberedPartitionFailed(40002);
+    STRING errorMsg;
+
     print gName;
 
     udf_com_detect_print_version();
@@ -152,17 +155,24 @@ CREATE QUERY tg_prenumbered_partition(
     udf_reset_timer(true);
     udf_start_whole_graph_collection();
     vertexList = SELECT n FROM Start:n
-        ACCUM udf_add_whole_graph_vertex(n.getAttr(louvainId_attr,"UINT"), n.outdegree());
+        ACCUM udf_add_whole_graph_vertex(n.getAttr(louvainId_attr,"UINT"), n.outdegree(e_types));
     PRINT udf_elapsed_time(true) AS CollectVerticesTime;
 
     udf_reset_timer(true);
-    udf_process_whole_graph_vertices();
+    ret = udf_process_whole_graph_vertices();
+    IF ret < 0 THEN
+        errorMsg = "ERROR: Prenumbered partition failed. Double check if the attribute " + 
+                    louvainId_attr +
+                    " is loaded with sequential data. Please see the GPE log for details.";
+        RAISE tgPrenumberedPartitionFailed(errorMsg);
+    END;
+
     udf_save_EdgePtr();
     PRINT udf_elapsed_time(true) AS ProcessVerticesTime;
 
     vertexList = SELECT s FROM Start:s-(e_types:e)->:t
-        ACCUM udf_set_louvain_edge_list(udf_get_compressed_id(s.getAttr(louvainId_attr,"UINT")),
-            udf_get_compressed_id(t.getAttr(louvainId_attr,"UINT")), e.getAttr(weight_attr,"FLOAT"), t.outdegree());
+        ACCUM udf_set_louvain_edge_list(udf_get_compressed_id(s.getAttr(louvainId_attr, "UINT")),
+            udf_get_compressed_id(t.getAttr(louvainId_attr,"UINT")), e.getAttr(weight_attr,"FLOAT"), t.outdegree(e_types));
     PRINT udf_elapsed_time(true) AS SetLouvainEdgeListTime;
     
     udf_reset_timer(true);

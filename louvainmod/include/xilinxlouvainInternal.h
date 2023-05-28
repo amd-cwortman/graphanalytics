@@ -41,22 +41,17 @@ using namespace std;
 #define COLORWIDTHS (32)
 #define NUM (DWIDTHS / 32)
 // design for kernel, but only host used now
-//#ifndef USE_U55C
-//#define MAXNV (1ul << 26)  //  67,108,864
-//#define MAXNE (1 << 27)  // 134,217.728
-//#define MAXNV_M (64000000)
-//#else
-//#define MAXNV (1ul << 27)
-//#define MAXNE (1 << 28)
-//#define MAXNV_M (128000000)
-//#endif
-//#define VERTEXS (MAXNV / NUM)
-//#define EDGES (MAXNE / NUM)
+#define NV_SCALE_FACTOR_IN_U50       26 
+#define NE_X2_SCALE_FACTOR_IN_U50    27 
+#define NV_SCALE_FACTOR_IN_U55C      27 
+#define NE_X2_SCALE_FACTOR_IN_U55C   28 
+#define NV_SCALE_FACTOR_IN_AWS_F1    27 
+#define NE_X2_SCALE_FACTOR_IN_AWS_F1 28 
 
 // glb will be init in ParLV.cpp:host_ParserParameters
-extern long glb_MAXNV ;
-extern long glb_MAXNE ;
-extern long glb_MAXNV_M ;
+extern long glb_MAXNV ; // the limitation of vertex number store into HBM
+extern long glb_MAXNEx2 ; // the limitation of edge number store into HBM, for undirected graph
+extern long glb_MAXNV_M ; // the limitation of vertex number used by the design, processing by 1 computer unit 
 
 #define DEGREES (1 << 17)
 #define COLORS (4096)

@@ -40,14 +40,14 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest/sphinx'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Xilinx Alveo Graph Analytics Products'
-copyright = '2022, Xilinx'
-author = 'Xilinx'
+project = 'AMD Accelerated Graph Machine Learning Library'
+copyright = '2022, AMD'
+author = 'AMD'
 
 # The short X.Y version
-version = '2.1'
+version = '1.1.0'
 # The full version, including alpha/beta/rc tags
-release = 'v2.1'
+release = 'v1.1.0'
 
 # For bottom-left nav
 try:
@@ -57,7 +57,7 @@ except NameError:
 
 #html_context['display_lower_left'] = True
 html_context['current_version'] = version
-html_context['versions'] = ['2.1']
+html_context['versions'] = ['1.1.0']
 
 # -- General configuration ---------------------------------------------------
 

@@ -30,17 +30,19 @@ NC='\033[0m' # No Color
 ###############################################################################
 
 # script options processing
-device_name="xilinx_u50_gen3x16_xdma_201920_3"
+device_name="u50"
 use_tcmalloc=0
+static_mode=0
 uninstall=0
 verbose=0
 force=0
 
-while getopts ":d:fhuv" opt
+while getopts ":d:fhsuv" opt
 do
 case $opt in
     f) force=1;;
-    d) device_name=$OPTARG;;    
+    d) device_name=$OPTARG;;
+    s) static_mode=1;;
     u) uninstall=1;;
     v) verbose=1;;
     ?) echo "ERROR: Unknown option: -$OPTARG"; exit 1;;
@@ -49,7 +51,8 @@ done
 
 . $SCRIPTPATH/common.sh
 
-. $SCRIPTPATH/set-plugin-vars.sh
+# . $SCRIPTPATH/set-plugin-vars.sh
+# already done in common.sh
 
 if [ $verbose -eq 1 ]; then
     echo "INFO: Script is running with the settings below:"
@@ -117,6 +120,11 @@ if [[ $uninstall -eq 1 ]]; then
     done
 
     rm -f $tg_udf_dir/$pluginLibName
+
+    if [ ! -z "$pluginStaticLibName" ]; then
+        rm -f $tg_udf_dir/$pluginStaticLibName
+    fi
+
     rm -rf $tg_udf_xclbin_dir
 
     cp $tg_udf_dir/ExprFunctions.hpp $tg_temp_include_dir
@@ -134,25 +142,33 @@ fi
 
 # If the XCLBIN is from sandbox, copy it to TigerGraph
 
-if [ $pluginAlveoProductNeedsInstall -eq 1 ]; then
+if [[ $pluginAlveoProductNeedsInstall -eq 1 ]]; then
     if [ $verbose -eq 1 ]; then
         echo "INFO: Installing local Alveo Product from $pluginAlveoProductPath into TigerGraph"
     fi
     mkdir -p $tg_udf_xclbin_dir
     
-    if [ ! -z "$pluginXclbinNameU50" ] && [ "$device_name" == "xilinx_u50_gen3x16_xdma_201920_3" ]; then
+    if [ ! -z "$pluginXclbinNameU50" ] && [ "$device_name" == "u50" ]; then
         cp -f $pluginAlveoProductXclbinPathU50 $tg_udf_xclbin_dir
     fi
 
-    if [ ! -z "$pluginXclbinNameU55C" ]; then
+    if [ ! -z "$pluginXclbinNameU55C" ] && [ "$device_name" == "u55c" ]; then
         cp -f $pluginAlveoProductXclbinPathU55C $tg_udf_xclbin_dir
     fi
     
-    if [ ! -z "$pluginXclbinNameAwsF1" ]; then
+    if [ ! -z "$pluginXclbinNameAwsF1" ] && [ "$device_name" == "aws-f1" ]; then
         cp -f $pluginAlveoProductXclbinPathAwsF1 $tg_udf_xclbin_dir
     fi
 
     cp -f $pluginAlveoProductLibDir/$pluginLibName $tg_udf_dir
+    if [[ ! -z "$pluginStaticLibName" &&  -f $pluginAlveoProductLibDir/$pluginStaticLibName ]]; then
+        cp -f $pluginAlveoProductLibDir/$pluginStaticLibName $tg_udf_dir
+    fi
+
+    if [ -f $pluginAlveoProductLibDir/icd/libxilinxopencl.so ]; then
+        mkdir -p $tg_udf_dir/icd
+        cp -f $pluginAlveoProductLibDir/icd/libxilinxopencl.so $tg_udf_dir/icd
+    fi
 fi
 
 # save a copy of the original UDF Files
@@ -208,6 +224,13 @@ for i in $pluginConfigPathFiles; do
     sed -i "s|PLUGIN_CONFIG_PATH|\"$tg_udf_dir/xilinx-plugin-config.json\"|" $tg_udf_dir/${i##*/}
 done
 
+# If static .so is enabled, enable the macro PLUGIN_USE_STATIC_SO
+if [ $static_mode -eq 1 ]; then
+    for i in $pluginUseStaticSoFiles; do
+        sed -i "s|//\\(#define PLUGIN_USE_STATIC_SO\\)|\\1|" $tg_udf_dir/${i##*/}
+    done
+fi
+
 # Install plugin to ExprFunctions.hpp file
 
 echo "INFO: Installing $pluginAlveoProductName UDFs"
@@ -227,10 +250,12 @@ cp $tg_udf_dir/ExprUtil.hpp $tg_temp_include_dir
 
 # Copy system libstdc++ for GPE to work around library compatibility issue
 OSDIST=`lsb_release -i |awk -F: '{print tolower($2)}' | tr -d ' \t'`
-mkdir -p $HOME/libstd
+
 if [[ $OSDIST == "ubuntu" ]]; then
-    cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6* $HOME/libstd
+    #cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6* $HOME/libstd
+    rm -rf $HOME/libstd
 elif [[ $OSDIST == "centos" ]]; then
+    mkdir -p $HOME/libstd
     cp /usr/lib64/libstdc++.so.6* $HOME/libstd
 else 
     echo "ERROR: only Ubuntu and Centos are supported."

@@ -109,8 +109,8 @@ if [ "$run_mode" -eq 2 ] || [ "$run_mode" -eq 3 ]; then
     echo gsql -u $username -p $password -g $xgraph \'run query entity_resolution_loadvec_alveo\(\)\'
     time gsql -u $username -p $password -g $xgraph "run query entity_resolution_loadvec_alveo()"
     echo "Running entity_resolution_alveo"
-    echo gsql -u $username -p $password -g $xgraph \'run query entity_resolution_alveo\(\)\'
-    time gsql -u $username -p $password -g $xgraph "run query entity_resolution_alveo()"
+    echo gsql -u $username -p $password -g $xgraph \'run query entity_resolution_alveo\($print_result\)\'
+    time gsql -u $username -p $password -g $xgraph "run query entity_resolution_alveo($print_result)"
     TOTAL_TIME=$(($(date +%s%3N) - START))
     echo "entity_resolution_alveo: " $TOTAL_TIME
 fi

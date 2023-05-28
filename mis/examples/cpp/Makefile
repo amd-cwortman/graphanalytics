@@ -20,7 +20,7 @@ SHELL := /bin/bash
 
 # Location of mis Alveo product
 ifndef XILINX_MIS
-    XILINX_MIS = /opt/xilinx/apps/graphanalytics/mis
+    XILINX_MIS = /opt/amd/apps/agml/mis
     export XILINX_MIS
 endif
 
@@ -28,11 +28,6 @@ endif
 ifndef XILINX_XRT
     XILINX_XRT = /opt/xilinx/xrt
     export XILINX_XRT
-endif
-
-ifndef XILINX_XRM
-    XILINX_XRM=/opt/xilinx/xrm
-    export XILINX_XRM
 endif
 
 #the default PRODUCT_VER as the latest version
@@ -57,12 +52,12 @@ endif
 CXXFLAGS = -std=c++11 -fPIC -pthread -I$(INCLUDE_PATH) -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-label \
     -Wno-unused-variable -Wno-unused-parameter -Wno-missing-field-initializers -Wno-deprecated-declarations
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
-ifeq ($(deviceNames),xilinx_u50_gen3x16_xdma_201920_3)
+deviceNames=u50
+ifeq ($(deviceNames),u50)
 	XCLBIN_FILE := $(XCLBIN_PATH)/mis_xilinx_u50_gen3x16_xdma_201920_3.xclbin
 else ifeq ($(deviceNames),aws-f1)
     XCLBIN_FILE := $(XCLBIN_PATH)/mis_xilinx_aws-vu9p-f1_shell-v04261818_201920_3.awsxclbin
-else ifeq ($(deviceNames),xilinx_u55c_gen3x16_xdma_base_2)
+else ifeq ($(deviceNames),u55c)
 	XCLBIN_FILE := $(XCLBIN_PATH)/mis_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin
 endif
 #else
@@ -89,7 +84,7 @@ cppdemo: $(EXE_FILE)
 $(EXE_FILE): misdemo.cpp
 	$(CXX) $(CXXFLAGS) $^ -o $@ \
 		-I$(XILINX_XRT)/include \
-		-L$(LIB_PATH) -lXilinxMis \
+		-L$(LIB_PATH) -lAMDMis \
 		-L$(XILINX_XRT)/lib -lOpenCL -lpthread -lxrt_coreutil -lrt -m64
 
 .PHONY: run clean
@@ -106,14 +101,14 @@ clean:
 
 help:
 	@echo "Makefile usages:"
-	@echo "  make run [deviceNames=xilinx_u50_gen3x16_xdma_201920_3]"
+	@echo "  make run [deviceNames=u50]"
 	@echo "    Run standalone test with statically linked executable"
 	@echo ""
 	@echo "  Run options:"
 	@echo "  deviceNames  : Specify Alveo devices to use for computation. Supported devices:"
-	@echo "                 xilinx_u50_gen3x16_xdma_201920_3 "
-	@echo "                 aws-f1"
-	@echo "                 xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "                   u50 (default) "
+	@echo "                   u55c"
+	@echo "                   aws-f1"
 	@echo ""
 	@echo "  make test"
 	@echo "    Compile mis test exe"

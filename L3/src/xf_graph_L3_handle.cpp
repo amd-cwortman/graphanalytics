@@ -63,6 +63,15 @@ int32_t Handle::initOpLouvainModularity(std::string xclbinFile, std::string kern
                                         std::string kernelAlias, unsigned int requestLoad,
                                         unsigned int numDevices, unsigned int cuPerBoard) 
 {
+#ifndef NDEBUG
+    std::cout << "AGML-DEBUG: " << __FILE__ << "::" << __FUNCTION__   
+              << "\n    xclbinFile=" << xclbinFile    
+              << "\n    kernelName=" << kernelName
+              << "\n    kernelAlias=" << kernelAlias
+              << "\n    requestLoad=" << requestLoad 
+              << "\n    numDevices=" << numDevices
+              << "\n    cuPerBoard=" << cuPerBoard << std::endl;
+#endif    
     uint32_t* deviceID;
     uint32_t* cuID;
     int32_t status = 0;
@@ -95,13 +104,16 @@ void Handle::addOp(singleOP op)
 int Handle::setUp(std::string deviceNames)
 {
     const std::string delimiters(" ");
-    for (int i = deviceNames.find_first_not_of(delimiters, 0); i != std::string::npos;
+    for (auto i = deviceNames.find_first_not_of(delimiters, 0); i != std::string::npos;
             i = deviceNames.find_first_not_of(delimiters, i)) {
         auto tokenEnd = deviceNames.find_first_of(delimiters, i);
         if (tokenEnd == std::string::npos)
             tokenEnd = deviceNames.size();
         const std::string token = deviceNames.substr(i, tokenEnd - i);
         supportedDeviceNames_.push_back(token);
+#ifndef NDEBUG
+    std::cout << "AGML-DEBUG: added " << token << " to supportedDeviceNames_" << std::endl;
+#endif        
         i = tokenEnd;
     }
     getEnv();
@@ -115,8 +127,8 @@ int Handle::setUp(std::string deviceNames)
             unsigned int boardNm = ops[i].numDevices;
             if (deviceCounter + boardNm > totalSupportedDevices_) {
                 std::cout << "ERROR: Current node does not have requested device count." 
-                    << "Requested: " << deviceCounter + boardNm 
-                    << "Available: " << totalSupportedDevices_ << std::endl;
+                    << " Requested: " << deviceCounter + boardNm 
+                    << " Available: " << totalSupportedDevices_ << std::endl;
                 return XF_GRAPH_L3_ERROR_NOT_ENOUGH_DEVICES;
             }
             std::thread thUn[boardNm];
@@ -234,20 +246,20 @@ void Handle::getEnv() {
     cl_uint num_platforms = 0;
     cl_int err2 = clGetPlatformIDs(0, NULL, &num_platforms);
     if (CL_SUCCESS != err2) {
-        std::cout << "INFO: get platform failed" << std::endl;
+        std::cout << "ERROR: get number of platforms failed, OpenCL error code " << err2 << std::endl;
     }
     platforms = (cl_platform_id*)malloc(sizeof(cl_platform_id) * num_platforms);
     if (NULL == platforms) {
-        std::cout << "INFO: allocate platform failed" << std::endl;
+        std::cout << "ERROR: allocate platform failed" << std::endl;
     }
     err2 = clGetPlatformIDs(num_platforms, platforms, NULL);
     if (CL_SUCCESS != err2) {
-        std::cout << "INFO: get platform failed" << std::endl;
+        std::cout << "ERROR: get platforms failed, OpenCL error code " << err2 << std::endl;
     }
     for (cl_uint ui = 0; ui < num_platforms; ++ui) {
         err2 = clGetPlatformInfo(platforms[ui], CL_PLATFORM_VENDOR, 128 * sizeof(char), vendor_name, NULL);
         if (CL_SUCCESS != err2) {
-            std::cout << "INFO: get platform failed" << std::endl;
+            std::cout << "ERROR: get platform info failed, OpenCL error code " << err2 << std::endl;
         } else if (!std::strcmp(vendor_name, "Xilinx")) {
             platformID = ui;
         }
@@ -268,7 +280,7 @@ void Handle::getEnv() {
         clGetDeviceInfo(devices[i], CL_DEVICE_NAME, valueSize, value, NULL);
         if (std::find(supportedDeviceNames_.begin(), supportedDeviceNames_.end(), value) != supportedDeviceNames_.end()) {
             std::cout << "INFO: Found requested device: " << value << " ID=" << i << std::endl;            
-            supportedDeviceIds_[totalSupportedDevices_++] = i;  // save curret supported supported devices
+            supportedDeviceIds_[totalSupportedDevices_++] = i;  // save current supported supported devices
         } else {
             std::cout << "INFO: Skipped non-requested device: " << value << " ID=" << i << std::endl;
         }

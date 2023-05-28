@@ -138,9 +138,9 @@ public:
         config_json.close();
 
         // set xclbinPath
-        if (deviceNames_ == "xilinx_u50_gen3x16_xdma_201920_3") {
+        if (deviceNames_ == "u50") {
             xclbinPath_ = PLUGIN_XCLBIN_PATH_U50;
-        } else if (deviceNames_ == "xilinx_u55c_gen3x16_xdma_base_2") {
+        } else if (deviceNames_ == "u55c") {
             xclbinPath_ = PLUGIN_XCLBIN_PATH_U55C;
         } else if (deviceNames_ == "aws-f1") {
             xclbinPath_ = PLUGIN_XCLBIN_PATH_AWSF1;
@@ -157,8 +157,13 @@ public:
     }
 
     std::string checkContext(int num_vertices) {
-        if(rowPtr_.size() <= 1) return "1";
-        else if(rowPtr_.size()-1 != num_vertices) return "2";
+        int rowPtrSize = 0;
+
+        if (pGraph_ == nullptr) rowPtrSize = rowPtr_.size(); // pGraph_ is not valid in the first run
+        else rowPtrSize = pGraph_->n + 1;            // rowPtr_ is moved into pGraph_ second run onwards
+
+        if(rowPtrSize <= 1) return "1";
+        else if(rowPtrSize-1 != num_vertices) return "2";
         else return "0";
     }
 
@@ -183,7 +188,7 @@ public:
         // add default zero entry
         rowPtr_.push_back(0);
 
-        // force recreate MIS Object
+        // force recreate MIS Graph
         misGraphIsModified_ = true;
     }
 
@@ -193,7 +198,6 @@ public:
 #ifdef XILINX_MIS_DEBUG_ON
             std::cout << "DEBUG: mis options changed.  Deleting old mis object (if it exists)." << std::endl;
 #endif
-            delete pGraph_;
             delete pMis_;
             pMis_ = nullptr;
             misObjIsModified_ = false;
@@ -214,9 +218,10 @@ public:
 #endif
 
             // create MIS object
-            pMis_ = new xilinx_apps::mis::MIS(options);
+            auto pTempMis = new xilinx_apps::mis::MIS(options);
             // start MIS, program xclbin: one time operation
-            pMis_->startMis();
+            pTempMis->startMis();
+            pMis_ = pTempMis;
         }
 
         return pMis_;
@@ -224,6 +229,10 @@ public:
 
     void setMisGraph() {
         if (misGraphIsModified_) {
+#ifdef XILINX_MIS_DEBUG_ON
+            std::cout << "DEBUG: mis graph changed.  Deleting old mis graph (if it exists)." << std::endl;
+#endif
+            delete pGraph_;
             // create graph object
             pGraph_ = new xilinx_apps::mis::GraphCSR(std::move(rowPtr_), std::move(colIdx_));
             // set MIS graph
@@ -243,7 +252,7 @@ private:
     xilinx_apps::mis::MIS *pMis_;
     xilinx_apps::mis::GraphCSR *pGraph_;
 
-    std::string deviceNames_ = "xilinx_u50_gen3x16_xdma_201920_3";
+    std::string deviceNames_ = "u50";
     std::string xclbinPath_;
     uint32_t numDevices_ = 1;
     std::string nodeIps_;
@@ -257,6 +266,13 @@ private:
 };
 
 } /* namespace xilMis */
+
+// The install script will enable this macro if installing in static (-s) mode
+//#define PLUGIN_USE_STATIC_SO
+
+#ifdef PLUGIN_USE_STATIC_SO
+#define XILINX_MIS_USE_STATIC_SO
+#endif
 
 #include "mis_loader.cpp"
 

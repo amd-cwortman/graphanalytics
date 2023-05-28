@@ -23,21 +23,23 @@
 #
 
 # Alveo product names
-pluginAlveoProductName="Xilinx Recommendation Engine"
-standaloneAlveoProductName="Xilinx Cosine Similarity"
+pluginAlveoProductName="AMD Recommendation Engine"
+standaloneAlveoProductName="AMD Cosine Similarity"
 
-# The usual place where the Alveo Product is installed
-pluginInstalledAlveoProductPath=/opt/xilinx/apps/graphanalytics/cosinesim/1.4
+# Name of the directory containing the Alveo Product installation
+pluginInstalledAlveoProductDirName=cosinesim
 
-# Where to find the git repo for the Alveo Product if it exists
-pluginLocalAlveoProductPath=$SCRIPTPATH/../../../../../cosinesim/staging
+# Where to find the git repo for the Alveo Product if it exists, relative to the repo dir
+pluginLocalAlveoProductPath=cosinesim/staging
 
 # The name of the Alveo Product's XCLBIN file
+pluginSupportedDevices="u50 u55c aws-f1"
 pluginXclbinNameU50=cosinesim_32bit_xilinx_u50_gen3x16_xdma_201920_3.xclbin
 pluginXclbinNameU55C=cosinesim_32bit_4pu_xilinx_u55c_gen3x16_xdma_base_2.xclbin
+pluginXclbinNameAwsF1=cosinesim_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin
 
 # The name of the Alveo Product's .so file
-pluginLibName=libXilinxCosineSim.so
+pluginLibName=libAMDCosineSim.so
 
 # Set to 1 if the Alveo Product's .so needs to be added to LD_PRELOAD
 pluginAlveoProductLibNeedsPreload=1
@@ -59,7 +61,8 @@ pluginMainUdf=udf/xilinxRecomEngine.hpp
 
 # List of header files to copy from the Alveo Product into the TigerGraph application area
 # and UDF compilation area.  The paths are relative to $pluginAlveoProductPath.
-pluginAlveoProductHeaders="include/cosinesim.hpp include/xilinx_apps_common.hpp src/cosinesim_loader.cpp"
+pluginAlveoProductHeaders="include/cosinesim.hpp include/xilinx_apps_common.hpp src/cosinesim_loader.cpp \
+include/xilinx_apps_loader.hpp"
 
 # List of header files to copy from the plugin into the TigerGraph application area
 # and UDF compilation area.  The paths are relative to the plugin top directory

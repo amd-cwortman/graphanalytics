@@ -11,5 +11,5 @@ Optimization product using C++/Python:
     :maxdepth: 1
 
     Deploy Alveo card <../common/deploy-alveo.rst>
-    Install Supply Chain Optimization Product <../mis/installation.rst>
+    Install Supply Chain Optimization Product <../mis/install.rst>
     Run Demo <../mis/demos.rst>

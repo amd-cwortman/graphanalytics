@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
+deviceNames=u50
 dataSource=$(CURDIR)/data/as-Skitter-wt-r100.mtx
 graphName=social_$(USER)
 alveoProject=
@@ -72,7 +72,7 @@ run-test: .install-query-done
 	gsql -g $(graphName) "run query insert_dummy_nodes(1)"
 	time gsql -g $(graphName) "run query test()"
 
-install-plugin: .install-plugin-done
+install-plugin: .install-udf-done
 
 .PHONY: run
 run: .install-udf-done
@@ -116,8 +116,9 @@ help:
 	@echo "Parameter descriptions:"
 	@echo "alveoProject      : Required. Partition files path / partition file name prefix"
 	@echo "deviceNames       : Target device name. Supported devices: "
-	@echo "                    xilinx_u50_gen3x16_xdma_201920_3 (default)"
-	@echo "                    xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "                      u50 (default)"
+	@echo "                      u55c"
+	@echo "                      aws-f1"	
 	@echo "dataSource        : A .mtx file containing input graph. default=./data/as-Skitter-wt-r100.mtx"
 	@echo "graphName         : graph name (default=social_<username>"
 	@echo "numPartitionsNode : Number of Alveo partitions per node"

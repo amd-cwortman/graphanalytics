@@ -30,11 +30,6 @@ namespace {
 
 using namespace xilinx_apps::louvainmod;
 
-// Max number of vertices that fit on one Alveo card
-long NV_par_max = 64*1000*1000;
-// Only use 80% NV_max to save 20% space for ghosts
-long NV_par_max_margin = NV_par_max * 8/10;
-
 // Values determined from the global options
 //
 struct ComputedSettings {
@@ -87,6 +82,12 @@ public:
     const ComputedSettings &settings_;
     LouvainMod::PartitionOptions partOpts_;
     bool isVerbose_ = false;
+    // Max number of vertices that fit on one Alveo card
+    long NV_par_max = glb_MAXNV_M;
+    long NE_par_max = glb_MAXNEx2;
+    //long NV_par_max = 64*1000*1000;
+    // Only use 80% NV_max to save 20% space for ghosts
+    //long NV_par_max_margin = NV_par_max * 8/10;
     ParLV parlv_;
     std::string projName_;
     std::string projPath_;
@@ -99,9 +100,9 @@ public:
     {
         int kernelMode = globalOpts.kernelMode;
 
-        if (kernelMode < 2 || kernelMode > 4) {
+        if (kernelMode < 2 || kernelMode > 5) {
             std::ostringstream oss;
-            oss << "Invalid kernelMode value " << kernelMode << ".  The supported values are 2, 3 and 4.";
+            oss << "Invalid kernelMode value " << kernelMode << ". The supported values are 2, 3, 4, and 5.";
             throw Exception(oss.str());
         }
         
@@ -159,6 +160,11 @@ public:
 
         // User requested NV per partition
         long NV_par_requested = partitionData.NV_par_requested;
+        //long NV_par_max = partitionData.NV_par_max;
+        long NV_par_max_margin = NV_par_max * 8/10;
+#ifndef NDEBUG
+    std::cout << "AGML-DEBUG: " << __FUNCTION__ << " NV_par_max_margin=" << NV_par_max_margin << std::endl;
+#endif            
         // No supplied desired partition size: calculate it
         if (NV_par_requested == 0) {
             int totalNumDevices = settings_.numServers * globalOpts_.numDevices;
@@ -206,11 +212,11 @@ public:
             NV_par_requested = NV_par_max_margin;
             std::cout << "INFO: NV_par_requested is adjusted to NV_par_max_margin " << NV_par_requested << std::endl;
         } else {
-             std::cout << "INFO: NV_par_requested is set to " << NV_par_requested << std::endl;           
+            std::cout << "INFO: NV_par_requested is set to " << NV_par_requested << std::endl;           
         }
 
         int numPartitionsCreated = 0;
-        if(!partOpts_.LBW_partition){
+        if (!partOpts_.LBW_partition) {
             numPartitionsCreated = xai_save_partition(
                 const_cast<long *>(partitionData.offsets_tg),
                 const_cast<Edge *>(partitionData.edgelist_tg),
@@ -220,7 +226,8 @@ public:
                 pathName_proj_svr,    // num_server==1? <dir>/louvain_partitions_ : louvain_partitions_svr<num_server>
                 partOpts_.par_prune,  // always be '1'
                 NV_par_requested,     // Allow to partition small graphs not bigger than FPGA limitation
-                NV_par_max
+                NV_par_max,
+                NE_par_max
             );
         } else {
             numPartitionsCreated = xai_save_partition_bfs(
@@ -238,8 +245,9 @@ public:
 
         if (numPartitionsCreated < 0) {
             std::ostringstream oss;
-            oss << "ERROR: Failed to create Alveo partition #" << parInServer_.size() << " for server partition "
-                << "start_vertex=" << partitionData.start_vertex << ", end_vertex=" << partitionData.end_vertex << ".";
+            oss << "AGML-ERROR: Failed to create Alveo partition #" << parInServer_.size() << " for server partition "
+                << "start_vertex=" << partitionData.start_vertex << ", end_vertex=" << partitionData.end_vertex << "."
+                << " Check if user \"tigergraph\" has write permission on the Alveo project directory.";
             throw Exception(oss.str());
         }
         parInServer_.push_back(numPartitionsCreated);
@@ -297,17 +305,18 @@ public:
         SaveHead<GLVHead>(pathName_tmp, &dummyGlvHead);
 
         if (isVerbose_) {
-            std::cout << "************************************************************************************************" << std::endl;
-            std::cout << "***********************  Louvain Partition Summary   *******************************************" << std::endl;
-            std::cout << "************************************************************************************************" << std::endl;
-            std::cout << "Number of servers                  : " << numServers << std::endl;
-            std::cout << "Output Alveo partition project     : " << globalOpts_.nameProj << std::endl;
-            std::cout << "Number of partitions created       : " << parlv_.num_par << std::endl;
-            std::cout << "Time for partitioning the graph    : " << (parlv_.timesPar.timePar_all + parlv_.timesPar.timePar_save) << std::endl;
-            std::cout << " partitioning +  saving \n" << std::endl;
-            std::cout << "    Time for partition             : " << parlv_.timesPar.timePar_all << std::endl;
-            std::cout << "    Time for saving                : " << parlv_.timesPar.timePar_save << std::endl;
-            std::cout << "************************************************************************************************" << std::endl;
+            std::cout << "*************************************************************************************" << std::endl;
+            std::cout << "***********************  Louvain Partition Summary   ********************************" << std::endl;
+            std::cout << "*************************************************************************************" << std::endl;
+            std::cout << "Number of servers                      : " << numServers << std::endl;
+            std::cout << "Output Alveo partition project         : " << globalOpts_.nameProj << std::endl;
+            std::cout << "Total number of vertices               : " << ((parlv_.plv_src == nullptr) ? 0 : parlv_.plv_src->NV) << std::endl;
+            std::cout << "Total number of edges                  : " << ((parlv_.plv_src == nullptr) ? 0 : parlv_.plv_src->NE) << std::endl;
+            std::cout << "Number of partitions created           : " << parlv_.num_par << std::endl;
+            std::cout << "Time for partitioning/saving the graph : " << (parlv_.timesPar.timePar_all + parlv_.timesPar.timePar_save) << std::endl;
+            std::cout << "    Time for partition                 : " << parlv_.timesPar.timePar_all << std::endl;
+            std::cout << "    Time for saving                    : " << parlv_.timesPar.timePar_save << std::endl;
+            std::cout << "*****************************************************************************************" << std::endl;
         }
     }
 };
@@ -462,16 +471,23 @@ float LouvainMod::loadAlveoAndComputeLouvain(const ComputeOptions &computeOpts)
               << "\n    numPureWorker=" << pImpl_->settings_.numPureWorker;
 #endif    
 
+    int kernelMode = pImpl_->options_.kernelMode;
+    if (kernelMode < 2 || kernelMode > 5) {
+        std::ostringstream oss;
+        oss << "Invalid kernelMode value " << kernelMode << ". The supported values are 2, 3, 4, and 5.";
+        throw Exception(oss.str());
+    }
+
     int i = 0;
     for (auto it = pImpl_->settings_.nameWorkers.begin(); it != pImpl_->settings_.nameWorkers.end(); ++it){
         nameWorkers[i++] = (char *)it->c_str();
         std::cout << "\n    nameWorker " << i << "=" << nameWorkers[i-1];
     }
     std::cout << std::endl;
-        
+
     finalQ = ::loadAlveoAndComputeLouvain(
                 (char *)(pImpl_->options_.xclbinPath.c_str()), 
-                pImpl_->options_.kernelMode, 
+                kernelMode, 
                 pImpl_->options_.numDevices, 
                 pImpl_->options_.deviceNames,
                 (char*)(pImpl_->options_.alveoProject.c_str()),

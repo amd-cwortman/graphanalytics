@@ -141,7 +141,7 @@ private:
  
 public:
     std::string curNodeHostname_;
-    std::string deviceNames_ = "xilinx_u50_gen3x16_xdma_201920_3";
+    std::string deviceNames_ = "u50";
     Partitions* curParPtr=nullptr;
 
 #ifdef XILINX_COM_DETECT_DUMP_MTX
@@ -193,35 +193,38 @@ public:
                     token = strtok(NULL, "\"\t ,}:{\n");
                     numDevices_ = atoi(token);
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-                    std::cout << "numDevices=" << numDevices_ << std::endl;
+                    std::cout << "    numDevices=" << numDevices_ << std::endl;
 #endif
                 } else if (!std::strcmp(token, "nodeIps")) {
-                    // this field has multipe space separated IPs
+                    // this field has multiple space separated IPs
                     scanNodeIp = true;
                     // read the next token
                     token = strtok(NULL, "\"\t ,}:{\n");
                     nodeIps_ += token;
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-                    std::cout << "node_ips=" << nodeIps_ << std::endl;
+                    std::cout << "    node_ips=" << nodeIps_ << std::endl;
 #endif
                 } else if (scanNodeIp) {
                     // In the middle of nodeIps field
                     nodeIps_ += " ";
                     nodeIps_ += token;
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-                    std::cout << "node_ips=" << nodeIps_ << std::endl;
+                    std::cout << "    node_ips=" << nodeIps_ << std::endl;
 #endif
                 }
                 token = strtok(NULL, "\"\t ,}:{\n");
             }
         }
         config_json.close();
-        if (deviceNames_ == "xilinx_u50_gen3x16_xdma_201920_3") {
+        if (deviceNames_ == "u50") {
             xclbinPath_ = PLUGIN_XCLBIN_PATH_U50;
             kernelMode_ = LOUVAINMOD_PRUNING_KERNEL;
-        } else if (deviceNames_ == "xilinx_u55c_gen3x16_xdma_base_2") {
+        } else if (deviceNames_ == "u55c") {
             xclbinPath_ = PLUGIN_XCLBIN_PATH_U55C;
             kernelMode_ = LOUVAINMOD_2CU_U55C_KERNEL;
+        } else if (deviceNames_ == "aws-f1") {
+            xclbinPath_ = PLUGIN_XCLBIN_PATH_AWSF1;
+            kernelMode_ = LOUVAINMOD_2CU_DDR_KERNEL;
         }
     }
     

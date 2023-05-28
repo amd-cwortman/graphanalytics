@@ -9,3 +9,10 @@ log.*
 ID*
 build_*
 _x*
+.ipcache
+reports
+*.log
+.run*
+.Xil
+*.xclbin
+nohup.out

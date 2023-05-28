@@ -15,7 +15,7 @@ via UDFs.
 
     (fpga)$ mkdir recomengine-example
     (fpga)$ cd recomengine-example
-    (fpga)$ cp -r /opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/1.4/examples .
+    (fpga)$ cp -r /opt/amd/apps/agml/integration/Tigergraph-3.x/1.4/examples .
 
 * Install demo specific plugin by following the instructions below. Note 
   the demo plugin is only needed to be installed once.

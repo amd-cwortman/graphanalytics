@@ -84,7 +84,7 @@ inline int udf_fuzzymatch_alveo(ListAccum<string> sourceList,
               << "\n    sourceListLen=" << sourceListLen
               << "\n    targetListLen=" << targetListLen << std::endl;
 
-    std::vector<std::vector<std::pair<int,int>>> match_result(targetListLen);
+    std::vector<std::vector<std::pair<int64_t,int>>> match_result(targetListLen);
 
     // only measure match time
     auto ts = std::chrono::high_resolution_clock::now();
@@ -99,7 +99,7 @@ inline int udf_fuzzymatch_loadvec_alveo(ListAccum<string> sourceList,  ListAccum
 {
 
     std::vector<std::string> sourceVector;
-    std::vector<int> sourceIdVector;
+    std::vector<int64_t> sourceIdVector;
     xilFuzzyMatch::Context *pContext = xilFuzzyMatch::Context::getInstance();
     xilinx_apps::fuzzymatch::FuzzyMatch *pFuzzyMatch = pContext->getFuzzyMatchObj();
 
@@ -110,10 +110,12 @@ inline int udf_fuzzymatch_loadvec_alveo(ListAccum<string> sourceList,  ListAccum
 
     // load sourceVector
     uint32_t sourceListLen = sourceList.size();
+
     for (unsigned i = 0 ; i < sourceListLen; ++i) {
         sourceVector.push_back(sourceList.get(i));
         sourceIdVector.push_back(sourceIdList.get(i));
     }
+    
        
 
     std::cout << "sourceVector size=" << sourceVector.size() << std::endl;
@@ -136,7 +138,7 @@ inline ListAccum<ListAccum<ListAccum<int64_t>>> udf_fuzzymatch_retres_alveo(
 
     int execTime;
 
-    std::vector<std::vector<std::pair<int,int>>> match_result_p;
+    std::vector<std::vector<std::pair<int64_t,int>>> match_result_p;
     ListAccum<ListAccum<ListAccum<int64_t>>> match_result;
 
     // populate target vector

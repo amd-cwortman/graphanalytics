@@ -20,19 +20,22 @@ set -e
 set -x
 
 if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 version"
+    echo "Usage: $0 release"
+    echo "    release: 0: Only generate a local package"
+    echo "             1: Copy package to the release directory"
     exit 1
 fi 
 
-version=$1
-pkg_name=amd-graphanalytics-install
+release=$1
+pkg_name=amd-agml-install
+version=$(cat ../plugin/tigergraph/agml/VERSION)
 tar_file=$pkg_name-$version.tar
 
 # remove the package with the same version
 rm -f $tar_file.gz 
 
 #update version number in the pacakge
-echo $version > $pkg_name/VERSION
+python3 ./pkg-update-version.py agml $version
 
 # copy requirements.txt
 cp ../requirements.txt $pkg_name/
@@ -41,6 +44,19 @@ cp ../requirements.txt $pkg_name/
 tar cf $tar_file $pkg_name
 gzip $tar_file
 
-mv $tar_file.gz /proj/gdba/release
+if [[ $release == 1 ]]; then
+    dest=/proj/gdba/release
+else
+    dest=/proj/gdba/release/internal
+fi
 
-echo "INFO: Pakcage is available at /proj/gdba/release/$tar_file.gz"
+mv $tar_file.gz $dest/
+
+# Make a symbolic link of the latest release
+if [[ $release == 1 ]]; then
+    cd $dest
+    ln -sf $tar_file.gz $pkg_name-latest.tar.gz
+    cd -
+fi
+echo "INFO: Pakcage is available at $dest/$tar_file.gz"
+

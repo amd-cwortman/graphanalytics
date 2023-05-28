@@ -1,0 +1,7 @@
+{
+    "agml": "0.2",
+    "louvainmod": "1.1.0",
+    "cosinesim": "1.1.0",
+    "fuzzymatch": "1.1.0",
+    "mis": "1.1.0"
+}

@@ -98,7 +98,7 @@ cosinesim-clean:
 #
 
 RECOM_TG3_RST_NAMES = \
-    api.rst index.rst install.rst overview.rst \
+    api.rst index.rst overview.rst \
     synthea-script.rst synthea-jupyter.rst \
     synthea-install.rst synthea-overview.rst synthea-query.rst synthea.rst \
     users-guide.rst
@@ -145,7 +145,7 @@ recom-tg3-clean:
 #
 
 # Package version
-PACKAGE_VERSION=$(strip $(shell cat ../../scripts/amd-graphanalytics-install/VERSION))
+PACKAGE_VERSION=$(strip $(shell cat ../../plugin/tigergraph/bundle/VERSION))
 
 # Standalone products
 COSINESIM_VERSION=$(strip $(shell cat ../../cosinesim/VERSION))

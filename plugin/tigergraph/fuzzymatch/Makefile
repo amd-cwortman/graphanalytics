@@ -17,7 +17,6 @@
 # Product name and version: PRODUCT_NAME is the name for TigerGraph plugin
 STANDALONE_NAME = fuzzymatch
 PRODUCT_NAME = fuzzymatch
-PRODUCT_VER=$(strip $(shell cat VERSION))
 
 .DELETE_ON_ERROR:
 .PHONY: all
@@ -70,10 +69,7 @@ STAGE_EXAMPLES_DIRS = $(SWIFTAML_DIR) $(ENTRESOLUTION_DIR)
 
 include ../common/Makefile-common.mk
 
-update-version:
-	sed -i 's,/graphanalytics/fuzzymatch/.*,/graphanalytics/fuzzymatch/$(PRODUCT_VER),g' bin/set-plugin-vars.sh
-
-stage: update-version stage-common
+stage: stage-common
 
 clean: clean-common
 

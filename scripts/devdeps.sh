@@ -76,6 +76,7 @@ ub_package_list()
      libzmq3-dev \
      default-jre \
      jq \
+     libgmp-dev \
      )
 }
 

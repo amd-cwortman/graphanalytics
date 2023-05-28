@@ -69,11 +69,11 @@ CREATE QUERY tg_supply_chain_schedule(
                 FROM Res_Graph:s
                 WHERE s.@valid == TRUE
                 ACCUM
-                    s.@and_active = TRUE,
-                    IF s.outdegree(e_type) == 0 THEN
-                        s.@or_selected += TRUE,
-                        s.@and_active += FALSE
-                    END
+                    s.@and_active = TRUE
+                    #IF s.outdegree(e_type) == 0 THEN
+                    #    s.@or_selected += TRUE,
+                    #    s.@and_active += FALSE
+                    #END
                 HAVING s.@and_active;
 
         mis_iter = 0;

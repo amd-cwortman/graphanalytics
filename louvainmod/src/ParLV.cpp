@@ -26,10 +26,11 @@
 #include "zmq/driver-worker/driver.hpp"
 
 
-// set default global max values for U50
-long glb_MAXNV = (1ul << 26);
-long glb_MAXNE = (1 << 27);
-long glb_MAXNV_M = (1 << 27);
+// Set default global max values. These are values for U50 and they will be updated 
+// for the target device when the handle is created.
+long glb_MAXNV = (1ul << NV_SCALE_FACTOR_IN_U50) - 1; // the limitation of vertex number store into HBM
+long glb_MAXNV_M = (1 << NV_SCALE_FACTOR_IN_U50) - 1; // the limitation of vertex number used by the design, processing by 1 computer unit 
+long glb_MAXNEx2 = (1 << NE_X2_SCALE_FACTOR_IN_U50); // the limitation of edge number store into HBM, for undirected graph
 
 using namespace std;
 
@@ -442,7 +443,7 @@ long UseInt(long nv, long* src, FILE* fp) {
 
 int SaveGLVBin(char* name, GLV* glv, bool useInt) {
 #ifndef NDEBUG
-    std::cout << "DEBUG:" << __FUNCTION__ << " name=" << name << std::endl;
+    std::cout << "AGML-DEBUG:" << __FUNCTION__ << " name=" << name << std::endl;
 #endif    
     assert(name);
     assert(glv);
@@ -456,7 +457,8 @@ int SaveGLVBin(char* name, GLV* glv, bool useInt) {
     long nelg = glv->NElg;
     FILE* fp = fopen(name, "wb");
     if (fp == NULL) {
-        printf("ERROR: SaveGLVBin failed to open %s \n", name);
+        printf("AGML-ERROR: SaveGLVBin failed to open %s \n", name);
+        printf("            Check if user \"tigergraph\" has write permission on the directory.");
         return -1;
     }
     fwrite(&headGLVBin, sizeof(long), 1, fp);
@@ -1134,6 +1136,19 @@ int host_ParserParameters(int argc,
 #endif
 
     }
+    if (deviceNames == "xilinx_u50_gen3x16_xdma_201920_3"){
+    	glb_MAXNV = (1ul << NV_SCALE_FACTOR_IN_U50) - 1;
+    	glb_MAXNEx2 = (1ul << NE_X2_SCALE_FACTOR_IN_U50);
+    	glb_MAXNV_M = (64000000);
+    } else if (deviceNames == "xilinx_u55c_gen3x16_xdma_base_2"){
+    	glb_MAXNV = (1ul << NV_SCALE_FACTOR_IN_U55C) - 1;
+    	glb_MAXNEx2 = (1ul << NE_X2_SCALE_FACTOR_IN_U55C);
+    	glb_MAXNV_M = (85000000);
+    } else if  (deviceNames == "xilinx_u55c_gen3x16_xdma_base_3"){
+    	glb_MAXNV = (1ul << NV_SCALE_FACTOR_IN_U55C) - 1;
+    	glb_MAXNEx2 = (1ul << NE_X2_SCALE_FACTOR_IN_U55C);
+    	glb_MAXNV_M = (85000000);
+    }   
 
     if (has_numThread != -1 && has_numThread < (argc - 1)) {
         rec[has_numThread] = true;
@@ -1186,7 +1201,7 @@ int host_ParserParameters(int argc,
         kernelMode = 1;
 
 #ifndef NDEBUG
-    printf("PARAMETER  kernelMode=%d\n", kernelMode);
+    printf("DEBUG: PARAMETER kernelMode=%d\n", kernelMode);
 #endif
     if (has_opts_output != -1 && has_opts_output < (argc - 1)) {
         opts_output = true;
@@ -1439,17 +1454,14 @@ void PrintRptPartition_Summary(
 void PrintRptPartition(int mode_zmq, ParLV& parlv, int op0_numDevices, int numNode, int numPureWorker) {
     if (mode_zmq != ZMQ_WORKER) {
         printf("************************************************************************************************\n");
-        printf(
-            "******************************  \033[1;35;40mPartition Louvain Performance\033[0m   "
-            "********************************\n");
+        printf("******************************  Partition Louvain Performance\033 ******************************\n");
         printf("************************************************************************************************\n");
-        printf("\033[1;37;40mINFO\033[0m: Original number of vertices            : %ld\n", parlv.plv_src->NV);
-        printf("\033[1;37;40mINFO\033[0m: Original number of un-direct edges     : %ld\n", parlv.plv_src->NE);
-        printf("\033[1;37;40mINFO\033[0m: number of partition                    : %d \n", parlv.num_par);
-        printf("\033[1;37;40mINFO\033[0m: number of device used                  : %d \n", op0_numDevices);
-        printf("\033[1;37;40mINFO\033[0m: Final number of communities            : %ld\n", parlv.plv_src->NC); 
-        printf("\033[1;37;40mINFO\033[0m: Final modularity                       : %lf\n",
-               parlv.plv_src->Q); // com_lit.back().
+        printf("AGML-INFO: Original number of vertices            : %ld\n", parlv.plv_src->NV);
+        printf("AGML-INFO: Original number of undirected edges    : %ld\n", parlv.plv_src->NE);
+        printf("AGML-INFO: Number of partitions                   : %d \n", parlv.num_par);
+        printf("AGML-INFO: Number of device used                  : %d \n", op0_numDevices);
+        printf("AGML-INFO: Final number of communities            : %ld\n", parlv.plv_src->NC); 
+        printf("AGML-INFO: Final modularity                       : %lf\n", parlv.plv_src->Q); 
         printf("************************************************************************************************\n");
 
         if (mode_zmq == ZMQ_NONE) {
@@ -3990,7 +4002,7 @@ int xai_save_partition_bfs(
 		//start_vertext_par += NV_par;
 		//p++;
 	//}
-    std::cout << "INFO: Total number of partitions created: " << num_par << std::endl;
+    std::cout << "AGML-INFO: Total number of partitions created: " << num_par << std::endl;
 	return num_par;
 }
 
@@ -4012,8 +4024,9 @@ int xai_save_partition(
 						    // Different server can have different path_prefix
 	int par_prune,          // Can always be set with value '1'
 	long NV_par_requested,  // NV requested per partition
-	long NV_par_max		    //  64*1000*1000;
-	) 
+	long NV_par_max,	    //  64*1000*1000;
+    long NE_par_max         // 128*1000*1000;
+    ) 
 {
 #ifndef NDEBUG
     std::cout << "DEBUG: " << __FUNCTION__ 
@@ -4022,6 +4035,7 @@ int xai_save_partition(
               << "\n    path_prefix=" << path_prefix
               << "\n    NV_par_requested=" << NV_par_requested
               << "\n    NV_par_max=" << NV_par_max
+              << "\n    NE_par_max=" << NE_par_max
               << std::endl;
 #endif
     int status = 0;
@@ -4049,17 +4063,33 @@ int xai_save_partition(
 				par_prune             // Ghost prunning parameter, always be '1'. It can be set by command-lin
 			);
 			long diff_NV = NV_par_max - parlv_par_src[p]->NV;
-            //std::cout << "DEBUG: after par_general_4TG " 
-            //          << "\n    NV_par=" << NV_par 
-            //          << "\n    diff_NV=" << diff_NV 
-            //          << "\n    parlv_par_src[p]->NV=" << parlv_par_src[p]->NV 
-            //          << std::endl;            
-			if (diff_NV < 0){
-				NV_par -= diff_NV;
+            // Note parlv_par_src[p]->NE is the number of directed edges.
+            // Need to multiple it by 2 to get the number of undirected edges
+			long diff_NE = NE_par_max - parlv_par_src[p]->NE * 2;
+#ifndef NDEBUG            
+            std::cout << "AGML-DEBUG: after par_general_4TG " 
+                      << "\n    NV_par=" << NV_par 
+                      << "\n    diff_NV=" << diff_NV 
+                      << "\n    diff_NE=" << diff_NE 
+                      << "\n    parlv_par_src[p]->NV=" << parlv_par_src[p]->NV 
+                      << "\n    p=" << p
+                      << "\n    start_vertext_par=" << start_vertext_par
+                      << std::endl;            
+#endif      
+            // Check if the resulted NV/NE are within the maximum. If not, reduce NV_par
+            // and try again      
+			if (diff_NV < 0) {
+				NV_par += diff_NV;// -= in Previously version, fixed now
 				delete(parlv_par_src[p]);
 				parlv_par_src[p] = NULL;
 			}
+            if ((parlv_par_src[p] != NULL) && diff_NE < 0) {
+                NV_par /= 2; // Because the edge is over the max edge, the 2-point trial of NV_par is made
+                delete(parlv_par_src[p]);
+                parlv_par_src[p] = NULL;
+            }
 		} while(parlv_par_src[p] == NULL); //If the partition is too big to load on FPGA, reduce the NV_par until partition is small enough
+        
         char nm[1024];
 		sprintf(nm, "_%03d.par", p);
 		parlv_par_src[p]->SetName(nm);
@@ -4070,9 +4100,12 @@ int xai_save_partition(
         if (status < 0) 
             return status;
 		start_vertext_par += NV_par;
+
+        std::cout << "AGML-INFO: Partition " << p << ": NV=" << parlv_par_src[p]->NV 
+                  << " NE=" << parlv_par_src[p]->NE << std::endl;
 		p++;
 	}
-    std::cout << "INFO: Total number of partitions created: " << p << std::endl;
+    std::cout << "AGML-INFO: Total number of partitions created: " << p << std::endl;
 	return p;
 }
 
@@ -4532,7 +4565,7 @@ int compute_louvain_alveo_seperated_load(
     ParLV* p_parlv_dvr, ParLV* p_parlv_wkr)
 {
 #ifndef NDEBUG
-    std::cout << "DEBUG: " << __FUNCTION__   
+    std::cout << "AGML-DEBUG: " << __FILE__ << "::" << __FUNCTION__   
               << "\n     kernelMode=" << kernelMode
               << "\n     numDevices=" << numDevices
               << "\n     numPartitions=" << numPartitions 
@@ -4545,8 +4578,7 @@ int compute_louvain_alveo_seperated_load(
               << std::endl;
 
     for (int i=0; i<numPureWorker; i++)
-        std::cout << "DEBUG: nameWorker " << i << "=" << nameWorkers[i] << std::endl;
-
+        std::cout << "\n    nameWorker " << i << "=" << nameWorkers[i] << std::endl;
 #endif
     int status = 0;
     bool isPrun = true;
@@ -4769,7 +4801,7 @@ int loadComputeUnitsToFPGAs(
     std::string deviceNames)
 {
 #ifndef NDEBUG
-    std::cout << "DEBUG: loadComputeUnitsToFPGAs"
+    std::cout << "AGML-DEBUG: " << __FILE__ << "::" << __FUNCTION__
               << "\n     xclbinPath=" << xclbinPath
               << "\n     kernelMode=" << kernelMode
               << "\n     numDevices=" << numDevices
@@ -4792,11 +4824,17 @@ int loadComputeUnitsToFPGAs(
         op0->setKernelAlias("kernel_louvain_pruning_u50");
     else if (kernelMode == LOUVAINMOD_2CU_U55C_KERNEL)
         op0->setKernelAlias("kernel_louvain_2cu_u55");
-    
+    else if (kernelMode == LOUVAINMOD_2CU_DDR_KERNEL)
+        //op0->setKernelAlias("kernel_louvain_2cu_ddr");
+        //op0->setKernelAlias("kernel_louvain_2cu_u200");  //HACK-FIXME
+        op0->setKernelAlias("kernel_louvain_ddr");  //HACK-FIXME
+                
+    //op0->cuPerBoard = (kernelMode == LOUVAINMOD_2CU_U55C_KERNEL || kernelMode == LOUVAINMOD_2CU_DDR_KERNEL) ? 2 : 1;
+    op0->cuPerBoard = (kernelMode == LOUVAINMOD_2CU_U55C_KERNEL) ? 2 : 1; // HACK-FIXME
+
     op0->requestLoad = requestLoad;
     op0->xclbinPath = xclbinPath;
     op0->numDevices = numDevices;
-    op0->cuPerBoard = (kernelMode == LOUVAINMOD_2CU_U55C_KERNEL) ? 2 : 1;
 
     //----------------- enable handle0--------
     handle0->addOp(*op0);
@@ -4814,7 +4852,7 @@ Return values:
     -4: Error in createSharedHandle
 */
 extern "C" float loadAlveoAndComputeLouvain(
-    char* xclbinPath, int kernelMode, unsigned int numDevices, std::string deviceNames,
+    char* xclbinPath, int kernelMode, unsigned int numDevices, std::string shortDeviceNames,
     char* alveoProject, unsigned mode_zmq, unsigned numPureWorker, char* nameWorkers[128], 
     unsigned int nodeID, char* opts_outputFile, unsigned int max_iter, unsigned int max_level, 
     float tolerance, bool intermediateResult, bool verbose, bool final_Q, bool all_Q) 
@@ -4839,6 +4877,19 @@ extern "C" float loadAlveoAndComputeLouvain(
         for (int i=0; i<numPartitions; i++) {
             parlv_drv.par_src[i] = new GLV(id_glv);
         }     
+    }
+
+    std::string deviceNames;
+    if (std::string::npos != shortDeviceNames.rfind("u50")) {
+        deviceNames = "xilinx_u50_gen3x16_xdma_201920_3";
+    } else if (std::string::npos != shortDeviceNames.rfind("u55c")) {
+        deviceNames = "xilinx_u55c_gen3x16_xdma_base_2 xilinx_u55c_gen3x16_xdma_base_3";
+    } else if (std::string::npos != shortDeviceNames.rfind("aws-f1")) {
+        //deviceNames = "xilinx_aws-vu9p-f1_shell-v04261818_201920_2";
+        // need to expand the deviceNames for F1
+        deviceNames = "xilinx_aws-vu9p-f1_shell-v04261818_201920_2 xilinx_aws-vu9p-f1_shell-v04261818_201920_3 xilinx_aws-vu9p-f1_dynamic-shell xilinx_u200_gen3x16_xdma_base_2";
+    } else if (std::string::npos != shortDeviceNames.rfind("u250")) {
+        deviceNames = "xilinx_u250_gen3x16_xdma_shell_2_1";
     }
 
     int status = createSharedHandle(xclbinPath, kernelMode, numDevices, deviceNames, opts_coloring,

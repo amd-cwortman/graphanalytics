@@ -15,7 +15,12 @@
 # limitations under the License.
 #
 
+if [ "$USER" == "tigergraph" ]; then
+    $SCRIPTPATH/install-udf-cluster.sh $verbose_flag $force_clean_flag
+else
 gsql_command="java -jar $HOME/gsql_client/gsql_client.jar"
+fi
+
 function gsql () {
      $gsql_command "$@"
 }
@@ -29,12 +34,11 @@ function usage() {
 	echo "  -r runMode           : 0: Skip both CPU and Alveo run (i.e. only run partition)"
 	echo "                         1: Run only on CPU"
 	echo "                         2: Run only on Alveo (default)"
-	echo "                         3: Run on both CPU and Alveo"    
-    echo "  -d numDevices        : number of FPGAs needed (default=1)"
-    echo "  -f                   : Force (re)install"
+	echo "                         3: Run on both CPU and Alveo"
     echo "  -g graphName         : graph name (default=social_<username>"
-    echo "  -i sshKey            : SSH key for user tigergraph"    
-    echo "  -s refNames          : A csv file with reference names. default=../data/ref-names.csv"    
+    echo "  -i sshKey            : SSH key for user tigergraph"
+    echo "  -l                   : Print detailed match results to JSON"
+    echo "  -s refNames          : A csv file with reference names. default=../data/ref-names.csv"
     echo "  -t newNames          : A csv file with new names. default=../data/new-names.csv"
     echo "  -v                   : Print verbose messages"
     echo "  -h                   : Print this help message"
@@ -51,10 +55,9 @@ new_names="$script_dir/../data/new-names.csv"
 num_nodes=$(cat $tg_data_root/gsql/udf/xilinx-plugin-config.json | jq .numNodes | tr -d \")
 verbose=0
 xgraph="entity_resolution_$username"
-force_clean=0
 compile_mode=1
 run_mode=2
-force_clean_flag=
+print_result="False"
 verbose_flag=
 
 # set default ssh_key for tigergraph
@@ -62,13 +65,13 @@ if [ -f ~/.ssh/tigergraph_rsa ]; then
     ssh_key_flag="-i ~/.ssh/tigergraph_rsa"
 fi
 
-while getopts "c:fg:i:lm:p:r:s:t:u:vh" opt
+while getopts "c:g:i:lm:p:r:s:t:u:vh" opt
 do
 case $opt in
     c) compile_mode=$OPTARG;;
-    f) force_clean=1; force_clean_flag=-f;;
     g) xgraph=$OPTARG;;
     i) ssh_key=$OPTARG; ssh_key_flag="-i $ssh_key";;
+    l) print_result="True";;
     m) num_nodes=$OPTARG;;
     r) run_mode=$OPTARG;;
     p) password=$OPTARG;;
@@ -107,4 +110,5 @@ if [ $verbose -eq 1 ]; then
     echo "      compileMode=$compile_mode"
     echo "      runMode=$run_mode"    
     echo "      sshKey=$ssh_key"
+    echo "      printResult=$print_result"
 fi

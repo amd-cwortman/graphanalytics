@@ -83,7 +83,7 @@ private:
 
 public:
     std::string curNodeHostname_;
-    std::string deviceNames_ = "xilinx_u50_gen3x16_xdma_201920_3";
+    std::string deviceNames_ = "u50";
 
     static Context *getInstance() {
         static Context *s_pContext = nullptr;
@@ -153,13 +153,12 @@ public:
             }
         }
         config_json.close();
-        if (deviceNames_ == "xilinx_u50_gen3x16_xdma_201920_3") {
+        if (deviceNames_ == "u50")
             xclbinPath_ = PLUGIN_XCLBIN_PATH_U50;
-        } else if (deviceNames_ == "xilinx_aws-vu9p-f1_shell-v04261818_201920_2") {
-            xclbinPath_ = PLUGIN_XCLBIN_PATH_AWSF1;
-        } else if (deviceNames_ == "xilinx_u55c_gen3x16_xdma_base_2") {
+        else if (deviceNames_ == "u55c")
             xclbinPath_ = PLUGIN_XCLBIN_PATH_U55C;
-        }
+        else if (deviceNames_ == "aws-f1") 
+            xclbinPath_ = PLUGIN_XCLBIN_PATH_AWSF1;
     }
     
     ~Context() { delete pFuzzyMatch_; }

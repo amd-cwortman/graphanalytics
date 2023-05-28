@@ -136,7 +136,7 @@ int main(int argc, const char* argv[]) {
     if (parser.getCmdOption("--devices", deviceNames)) {
         std::cout << "INFO: Set deviceNames to " << deviceNames << std::endl;
     } else {
-    	deviceNames = "xilinx_u50_gen3x16_xdma_201920_3";
+    	deviceNames = "u50";
         std::cout << "INFO: Use default deviceNames " << deviceNames << std::endl;
     }
     
@@ -204,7 +204,7 @@ int main(int argc, const char* argv[]) {
         inputVector[i] = allInputVector[i];
     }
 
-    std::vector<std::vector<std::pair<int,int>>> hwResult(numEntities);
+    std::vector<std::vector<std::pair<int64_t,int>>> hwResult(numEntities);
 
     std::vector<std::string> patternVector;
     load_csv(totalEntities, -1U, patternFile , patternIndex, patternVector);

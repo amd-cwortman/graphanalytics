@@ -136,7 +136,7 @@ int main(int argc, const char* argv[]) {
     if (parser.getCmdOption("--devices", deviceNames)) {
         std::cout << "INFO: Set deviceNames to " << deviceNames << std::endl;
     } else {
-    	deviceNames = "xilinx_u50_gen3x16_xdma_201920_3";
+    	deviceNames = "u50";
         std::cout << "INFO: Use default deviceNames " << deviceNames << std::endl;
     }
     
@@ -204,7 +204,7 @@ int main(int argc, const char* argv[]) {
         test_transaction[i] = list_trans[i];
     }
 
-    std::vector<std::vector<std::pair<int,int>>> hwResult(numEntities);
+    std::vector<std::vector<std::pair<int64_t,int>>> hwResult(numEntities);
 
     std::vector<std::string> patternVector;
     load_csv(totalEntities, -1U, patternFile , patternIndex, patternVector);
@@ -237,6 +237,17 @@ int main(int argc, const char* argv[]) {
 
         std::cout << "\nINFO: FuzzyMatch FPGA statistics:";
         std::cout << numEntities << " transactions were processed.\n";
+#ifndef NDEBUG
+        for (int i = 0; i < numEntities; i++) {
+            for (unsigned int j = 0; j < hwResult[i].size(); j++) {
+                        if( j > 0) std::cout <<",";
+                        int hw_id_t = hwResult[i][j].first;
+                        int hw_score_t = hwResult[i][j].second;
+                        std::cout << " [" << hw_id_t << "," << hw_score_t << "]";
+            }
+            std::cout<<"\n";
+        }
+#endif   
 
         std::cout << "Min(ms)\t\tMax(ms)\t\tAvg(ms)\n";
         std::cout << "----------------------------------------" << std::endl;

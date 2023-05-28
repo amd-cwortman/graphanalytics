@@ -17,7 +17,6 @@
 # Product name and version: PRODUCT_NAME is the name for TigerGraph plugin
 STANDALONE_NAME = louvainmod
 PRODUCT_NAME = comdetect
-PRODUCT_VER=$(strip $(shell cat VERSION))
 
 .DELETE_ON_ERROR:
 .PHONY: all
@@ -58,10 +57,7 @@ STAGE_EXAMPLES_DIRS = $(EXAMPLE_DIR)
 
 include ../common/Makefile-common.mk
 
-update-version:
-	sed -i 's,/graphanalytics/louvainmod/.*,/graphanalytics/louvainmod/$(PRODUCT_VER),g' bin/set-plugin-vars.sh
-
-stage: update-version stage-common
+stage: stage-common
 
 clean: clean-common
 

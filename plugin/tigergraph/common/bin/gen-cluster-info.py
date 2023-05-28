@@ -96,7 +96,7 @@ if numDevices == 0:
     print('ERROR: Unable to find target Alveo devices. Please contact AMD GraphAnalytics support.')
     print('       Please run the command below to list all Alveo devices installed on the system:')
     print('       /opt/xilinx/xrt/bin/xbutil examine')
-    sys.exit(1) 
+    #sys.exit(1) #HACK-FIXME
 
 curNodeHostname = socket.gethostname()
 print('DEBUG: numDevices=', numDevices)

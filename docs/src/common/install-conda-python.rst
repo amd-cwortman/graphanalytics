@@ -20,10 +20,10 @@ Using Conda
     $ conda env list
     $ conda create -n fpga python=3.6
     $ conda activate fpga
-    (fpga)$ pip install -r /opt/xilinx/apps/graphanalytics/requirements.txt
+    (fpga)$ pip install -r /opt/amd/apps/agml/requirements.txt
 
-Using local python
-------------------
+Using Python Virtual Environment
+--------------------------------
 
 * At least Python version 3.6 is required, install or upgrade python using your package manager
 
@@ -33,4 +33,4 @@ Using local python
 
     $ python3 -m venv fpga
     $ source fpga/bin/activate
-    (fpga)$ pip install -r /opt/xilinx/apps/graphanalytics/requirements.txt
+    (fpga)$ pip install -r /opt/amd/apps/agml/requirements.txt

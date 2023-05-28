@@ -7,7 +7,7 @@ C++ Example using Makefile
 
 .. code-block:: bash
 
-    cp -r /opt/xilinx/apps/graphanalytics/cosinesim/%COSINESIM_VERSION/examples cosinesim-examples
+    cp -r /opt/amd/apps/agml/cosinesim/%COSINESIM_VERSION/examples cosinesim-examples
     cd cosinesim-examples/cpp
     make
     make run

@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
         << "Local-Ghost NE: " << nelg << std::endl
         << std::endl;
     
+    //return 0;
     dumpList("Edge List Pointers (Offsets)", g->edgeListPtrs, nv + 1);
     dumpList("Edge List (head,tail,weight)", g->edgeList, ne_undir);
     dumpList("M", glv->M, nv);

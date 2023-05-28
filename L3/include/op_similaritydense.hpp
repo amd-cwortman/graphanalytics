@@ -108,6 +108,23 @@ class opSimilarityDense : public opBase {
                               std::vector<cl::Memory>& ob_in,
                               std::vector<cl::Memory>& ob_out);
 
+    static void bufferInitIntDDR(clHandle* hds,
+                              std::string instanceName0,
+                              xf::graph::Graph<int32_t, int32_t> g,
+                              int cuID,
+                              int similarityType,
+                              int dataType,
+                              int32_t topK,
+                              int sourceNUM,
+                              int32_t* sourceWeight,
+                              int32_t* sourceCoeffs,
+                              uint32_t* config,
+                              int32_t* resultID,
+                              float* similarity,
+                              //cl::Kernel& kernel0,
+                              std::vector<cl::Memory>& ob_in,
+                              std::vector<cl::Memory>& ob_out);
+
     static int cuExecute(
         clHandle* hds, cl::Kernel& kernel0, unsigned int num_runs, std::vector<cl::Event>* evIn, cl::Event* evOut);
 

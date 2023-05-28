@@ -13,7 +13,7 @@ Run following commands in the Python virtual environment (from setup) to run the
 
 .. code-block:: bash
 
-    (fpga)$ cp -r /opt/xilinx/apps/graphanalytics/cosinesim/%COSINESIM_VERSION/examples cosinesim-examples
+    (fpga)$ cp -r /opt/amd/apps/agml/cosinesim/%COSINESIM_VERSION/examples cosinesim-examples
     (fpga)$ cd cosinesim-examples/python
     (fpga)$ ./run.sh jupyter notebook jupyter/jupyter_demo.ipynb
 

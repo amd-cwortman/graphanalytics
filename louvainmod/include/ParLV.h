@@ -260,8 +260,9 @@ int xai_save_partition(long* offsets_tg, edge* edgelist_tg, long* drglist_tg,
 							    // Different server can have different path_prefix
 		int par_prune,          // Can always be set with value '1'
 		long NV_par_recommand,  // Allow to partition small graphs not bigger than FPGA limitation
-		long NV_par_max		    //  64*1000*1000;
-		);
+		long NV_par_max,	    //  for u50 64*1000*1000; for u55c 85*1000*1000
+		long NE_par_max         //  for u50 128*1000*1000; for u55c 256*1000*1000
+        );
 
 // API for LBW partition
 int xai_save_partition_bfs(long* offsets_tg, edge* edgelist_tg, long* drglist_tg,

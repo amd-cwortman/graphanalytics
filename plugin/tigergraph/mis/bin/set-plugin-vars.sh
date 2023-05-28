@@ -26,23 +26,24 @@
 pluginAlveoProductName="Xilinx Maximal Independent Set"
 standaloneAlveoProductName="Xilinx Maximal Independent Set"
 
-# The usual place where the Alveo Product is installed
-pluginInstalledAlveoProductPath=/opt/xilinx/apps/graphanalytics/mis/0.6
+# Name of the directory containing the Alveo Product installation
+pluginInstalledAlveoProductDirName=mis
 
-# Where to find the git repo for the Alveo Product if it exists
-pluginLocalAlveoProductPath=$SCRIPTPATH/../../../../../mis/staging
+# Where to find the git repo for the Alveo Product if it exists, relative to the repo dir
+pluginLocalAlveoProductPath=mis/staging
 
 # The name of supported XCLBIN files
-pluginSupportedDevices="xilinx_u50_gen3x16_xdma_201920_3 xilinx_u55c_gen3x16_xdma_base_2 aws-f1"
+pluginSupportedDevices="u50 u55c aws-f1"
 pluginXclbinNameU50=mis_xilinx_u50_gen3x16_xdma_201920_3.xclbin
 pluginXclbinNameAwsF1=mis_xilinx_aws-vu9p-f1_shell-v04261818_201920_3.awsxclbin
 pluginXclbinNameU55C=mis_xilinx_u55c_gen3x16_xdma_2_202110_1.xclbin
 
 # The name of the Alveo Product's .so file
-pluginLibName=libXilinxMis.so
+pluginLibName=libAMDMis.so
+pluginStaticLibName=libAMDMisStatic.so
 
 # Set to 1 if the Alveo Product's .so needs to be added to LD_PRELOAD
-pluginAlveoProductLibNeedsPreload=1
+pluginAlveoProductLibNeedsPreload=0
 
 #
 # Plugin Variables
@@ -61,7 +62,7 @@ pluginMainUdf=udf/xilinxMis.hpp
 
 # List of header files to copy from the Alveo Product into the TigerGraph application area
 # and UDF compilation area.  The paths are relative to $pluginAlveoProductPath.
-pluginAlveoProductHeaders="include/xilinxmis.hpp include/xilinx_apps_common.hpp src/mis_loader.cpp"
+pluginAlveoProductHeaders="include/xilinxmis.hpp include/xilinx_apps_common.hpp include/xilinx_apps_loader.hpp src/mis_loader.cpp"
 
 # List of header files to copy from the plugin into the TigerGraph application area
 # and UDF compilation area.  The paths are relative to the plugin top directory
@@ -80,3 +81,7 @@ pluginXclbinPathFiles="xilinxMis.hpp xilinxMisImpl.hpp"
 # List of files (name only, no path) that need to have the identifier PLUGIN_CONFIG_PATH
 # replaced with the config path.
 pluginConfigPathFiles="xilinxMisImpl.hpp xilinxMis.hpp"
+
+# List of files (name only, no path) that need to have the macro PLUGIN_USE_STATIC_SO
+# replaced with "1" to turn on the use of the static .so
+pluginUseStaticSoFiles="xilinxMisImpl.hpp"

@@ -1294,7 +1294,8 @@ GLV* SttGPar::ParNewGlv(
 	return glv;
 }
 
-GLV* SttGPar::ParNewGlv_Prun(graphNew* G, long st, long ed, int& id_glv, int th_maxGhost){
+GLV* SttGPar::ParNewGlv_Prun(graphNew* G, long st, long ed, int& id_glv, int th_maxGhost)
+{
 	start = st;
 	end = ed;
 	long NV = G->numVertices;
@@ -1320,13 +1321,13 @@ GLV* SttGPar::ParNewGlv_Prun(graphNew* G, long st, long ed, int& id_glv, int th_
         long adj1    = vtxPtr[v];
         long adj2    = vtxPtr[v+1];
         int degree   = adj2-adj1;
-        for(int d=0; d<degree; d++){
+        for (int d=0; d<degree; d++){
             long e = vtxInd[adj1+d].tail;
             double w = vtxInd[adj1+d].weight;
             e_dgr = vtxPtr[e+1] - vtxPtr[e];
             head_m = v - start;
             EdgePruning(elist, v, e, w, M_v, gMinDgr, num_vg, e_dgr, th_maxGhost);
-        }//for
+        }
         long smallest = num_vg < th_maxGhost ? num_vg : th_maxGhost;
         for(int i = 0; i < smallest; i++) {
             itr = map_v_g.find(gMinDgr.tail[i]);
@@ -1343,7 +1344,6 @@ GLV* SttGPar::ParNewGlv_Prun(graphNew* G, long st, long ed, int& id_glv, int th_
             num_e_lg++;
             num_e_dir++;
             num_e++;
-            //printf("vertex= %ld\t nGhost= %ld\t sGhost= %ld\t  degree= %ld\t\n", v, num_vg, gMinDgr.tail[i], gMinDgr.dgrs[i]);
         }
     }
     num_v_l = end - start;
@@ -1354,20 +1354,22 @@ GLV* SttGPar::ParNewGlv_Prun(graphNew* G, long st, long ed, int& id_glv, int th_
 	GetGFromEdge(Gnew, elist, num_v, num_e_dir);
 	glv->SetByOhterG(Gnew);
 	glv->SetM(M_v);
-	//printG(Gnew);
-	//FreeG(Gnew);
+
 	free(elist);
 	free(M_v);
 	return glv;
 }
 
-GLV* SttGPar::ParNewGlv_Prun(long start_tg, long* offsets_tg, edge* edgelist_tg, long* dgrlist_tg, long start_par,
-    long size_par, int& id_glv, int th_maxGhost)
+GLV* SttGPar::ParNewGlv_Prun(
+    long start_tg, long* offsets_tg, edge* edgelist_tg, long* dgrlist_tg, 
+    long start_par, long size_par, int& id_glv, int th_maxGhost)
 {
-    /*std::cout << "\nDEBUG: ParNewGlv_Prun "  
+#ifndef NDEBUG
+    std::cout << "AGML-DEBUG: ParNewGlv_Prun "  
               << "\n    size_par=" << size_par
               << "\n    id_glv=" << id_glv
-              << std::endl;*/
+              << std::endl;
+#endif
     start = start_par;  // global ID of first local vertex (vertex in the partition)
     long ed_par = start_par+size_par;  // 1 + global ID of last local vertex
     end = ed_par;
@@ -1464,8 +1466,10 @@ void GetGFromEdge(graphNew *G, edge *edgeListTmp, long num_v, long num_e_dir)
     //Parse the first line:
     long NV = num_v, ED=num_e_dir*2, NE=num_e_dir;
   
-    printf("|V|= %ld, |E|= %ld \n", NV, NE);
-  
+#ifndef NDEBUG
+    std::cout << "AGML-DEBUG: " << __FUNCTION__ << "NV=" << NV << " NE=" << NE << std::endl;
+#endif    
+
     //Remove duplicate entries:
       //Allocate for Edge Pointer and keep track of degree for each vertex
     long  *edgeListPtr = (long *)  malloc((NV+1) * sizeof(long));

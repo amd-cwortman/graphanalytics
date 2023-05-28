@@ -20,6 +20,7 @@ SCRIPTPATH=`dirname $SCRIPT`
 
 RED='\033[0;31m'
 NC='\033[0m' # No Color
+uninstall=0
 
 if ! [ -x "$(command -v jq)" ]; then
     echo "ERROR: The program jq is required. Please follow the instructions below to install it:"
@@ -56,7 +57,7 @@ tg_udf_xclbin_dir=$tg_udf_dir/xclbin
 plugin_ld_preload=
 
 # Set up variables and checks specific to the plugin
-PRODUCT_VER=`cat $SCRIPTPATH/../VERSION`
+PRODUCT_VER=$(cat $SCRIPTPATH/../VERSION)
 . $SCRIPTPATH/set-plugin-vars.sh
 
 # Use the local git repo for Alveo Product artifacts if the repo dir exists;
@@ -65,9 +66,23 @@ PRODUCT_VER=`cat $SCRIPTPATH/../VERSION`
 pluginAlveoProductNeedsInstall=0
 pluginAlveoProductPath=$pluginInstalledAlveoProductPath
 
-if [ -d $pluginLocalAlveoProductPath ]; then
+# Check if running install from a plug-in staging directory inside repo dir
+if [ -d $SCRIPTPATH/../../../../../$pluginLocalAlveoProductPath ]; then
     pluginAlveoProductNeedsInstall=1
-    pluginAlveoProductPath=$pluginLocalAlveoProductPath;
+    pluginAlveoProductPath=$SCRIPTPATH/../../../../../$pluginLocalAlveoProductPath;
+
+# Check if running install from the bundle staging directory inside repo dir
+elif [ -d $SCRIPTPATH/../../../../../../$pluginLocalAlveoProductPath ]; then
+    pluginAlveoProductNeedsInstall=1
+    pluginAlveoProductPath=$SCRIPTPATH/../../../../../../$pluginLocalAlveoProductPath;
+
+# Check if running from inside the plug-in dir of the installed bundle
+elif [ -d $SCRIPTPATH/../../alveo/$pluginInstalledAlveoProductDirName/ ]; then
+    pluginAlveoProductPath=$SCRIPTPATH/../../alveo/$pluginInstalledAlveoProductDirName
+
+# Alveo Product isn't found from any other area: use the installed Alveo Product from it's installed area
+else
+    pluginAlveoProductPath=/opt/xilinx/apps/graphanalytics/$pluginInstalledAlveoProductDirName/$PRODUCT_VER
 fi
 
 # Assume that the Alveo Product XCLBIN and .so will be used directly from their directories
@@ -95,22 +110,23 @@ fi
 
 # Make sure the XCLBIN exists (unless we're uninstalling)
 
-if [ $uninstall -eq 0 ] && [ ! -f $pluginAlveoProductXclbinPathU50 ] && [ "$device_name" == "xilinx_u50_gen3x16_xdma_201920_3" ]; then
+if [ $uninstall -eq 0 ] && [ ! -f $pluginAlveoProductXclbinPathU50 ] && [ "$device_name" == "u50" ]; then
     printf "${RED}ERROR: $standaloneAlveoProductName Alveo U50 product not found. $pluginAlveoProductXclbinPathU50 is missing. ${NC}\n"
     printf "INFO: Please download $standaloneAlveoProductName Alveo product installation package "
     printf "from Xilinx Database PoC site: https://www.xilinx.com/member/dba_poc.html\n"
     exit 1
 fi
 
-if [ $uninstall -eq 0 ] && [ ! -f $pluginAlveoProductXclbinPathU55C ] && [ "$device_name" == "xilinx_u55c_gen3x16_xdma_base_2" ]; then
+if [ $uninstall -eq 0 ] && [ ! -f $pluginAlveoProductXclbinPathU55C ] && [ "$device_name" == "u55c" ]; then
+    printf "${RED}ERROR: $pluginAlveoProductXclbinPathU55C is missing.${NC}\n"
     printf "${RED}ERROR: $standaloneAlveoProductName Alveo U55C product not found.${NC}\n"
     printf "INFO: Please download $standaloneAlveoProductName Alveo product installation package "
     printf "from Xilinx Database PoC site: https://www.xilinx.com/member/dba_poc.html\n"
     exit 1
 fi
 
-if [ $uninstall -eq 0 ] && [ ! -f $pluginAlveoProductXclbinPathAwsF1 ] && [ "$device_name" == "xilinx_aws-vu9p-f1_shell-v04261818_201920_2" ]; then
-    printf "${RED}ERROR: $standaloneAlveoProductName product not found.${NC}\n"
+if [ $uninstall -eq 0 ] && [ ! -f $pluginAlveoProductXclbinPathAwsF1 ] && [ "$device_name" == "aws-f1" ]; then
+    printf "${RED}ERROR: $standaloneAlveoProductName product not found: $pluginAlveoProductXclbinPathAwsF1 is missing.${NC}\n"
     printf "INFO: Please download $standaloneAlveoProductName product installation package "
     printf "from Xilinx Database PoC site: https://www.xilinx.com/member/dba_poc.html\n"
     exit 1

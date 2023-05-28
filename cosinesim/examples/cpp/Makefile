@@ -19,9 +19,9 @@ SHELL := /bin/bash
 # Run make using "make DEBUG=1" to build debuggable executables
 
 # Location of cosine similarity Alveo product 
-ifndef XILINX_COSINESIM
-    XILINX_COSINESIM = /opt/xilinx/apps/graphanalytics/cosinesim
-    export XILINX_COSINESIM
+ifndef AMD_COSINESIM
+    AMD_COSINESIM = /opt/amd/apps/agml/cosinesim
+    export AMD_COSINESIM
 endif
 
 # Location of XRT and XRM (for "run" target only)
@@ -52,9 +52,9 @@ XCLBIN_PATH = $(XF_PROJ_ROOT)/xclbin
 $(info LIB_PATH is $(LIB_PATH))
 
 ifeq ($(wildcard $(LIB_PATH)/*.so),)
-    LIB_PATH = $(XILINX_COSINESIM)/${PROD_VERSION}/lib
-    INCLUDE_PATH = $(XILINX_COSINESIM)/${PROD_VERSION}/include
-    XCLBIN_PATH = $(XILINX_COSINESIM)/${PRODUCT_VER}/xclbin
+    LIB_PATH = $(AMD_COSINESIM)/${PRODUCT_VER}/lib
+    INCLUDE_PATH = $(AMD_COSINESIM)/${PRODUCT_VER}/include
+    XCLBIN_PATH = $(AMD_COSINESIM)/${PRODUCT_VER}/xclbin
 endif
 
 $(info XCLBIN_PATH is $(XCLBIN_PATH))
@@ -69,19 +69,17 @@ CXXFLAGS += -O3
 endif
 
 
-LDFLAGS = -L$(LIB_PATH) -lXilinxCosineSim -lpthread -m64
+LDFLAGS = -L$(LIB_PATH) -lAMDCosineSim -lpthread -m64
 
-#$(info PROJ_ROOT="$(XF_PROJ_ROOT)")
-#$(info LIB_PATH="$(LIB_PATH)")
-#$(info INCLUDE_PATH="$(INCLUDE_PATH)")
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
-XDEVICE = $(basename $(notdir $(deviceNames)))
-ifeq ($(XDEVICE), xilinx_u50_gen3x16_xdma_201920_3)
+deviceNames=u50
+ifeq ($(deviceNames), u50)
 	XCLBIN_FILE := $(XCLBIN_PATH)/cosinesim_32bit_xilinx_u50_gen3x16_xdma_201920_3.xclbin
-else ifeq ($(XDEVICE), xilinx_aws-vu9p-f1_shell-v04261818_201920_2)
-    XCLBIN_FILE := $(XCLBIN_PATH)/cosinesim_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin 
-else ifeq ($(XDEVICE),xilinx_u55c_gen3x16_xdma_base_2)
+else ifeq ($(deviceNames), u55c)
     XCLBIN_FILE := $(XCLBIN_PATH)/cosinesim_32bit_4pu_xilinx_u55c_gen3x16_xdma_base_2.xclbin 
+else ifeq ($(deviceNames), aws-f1)
+    XCLBIN_FILE := $(XCLBIN_PATH)/cosinesim_xilinx_aws-vu9p-f1_shell-v04261818_201920_2.awsxclbin
+else ifeq ($(deviceNames), u200)
+    XCLBIN_FILE := $(XCLBIN_PATH)/cosinesim_xilinx_u200_gen3x16_xdma_2_202110_1.xclbin 
 else
     $(warning [WARNING]: This project has not been tested for $(deviceNames). It may or may not work.)
 endif
@@ -96,7 +94,7 @@ cppdemo: cppdemo.cpp
 ITERATIONS=1
 NUMVECTORS=5000
 
-run:
+run: demo
 	@set -e; \
 	. $(XILINX_XRT)/setup.sh; \
 	. $(XILINX_XRM)/setup.sh; \
@@ -108,15 +106,15 @@ clean:
 
 help:
 	@echo "Makefile usages:"
-	@echo "  make run  [deviceNames=xilinx_u50_gen3x16_xdma_201920_3]"
+	@echo "  make run  [deviceNames=u50]"
 	@echo "    Run standalone test with statically linked executable"
 	@echo ""
-	@echo "  Run options:"
-	@echo "  deviceNames  : Specify Alveo devices to use for computation"
-	@echo "                 Supported devices:"
-	@echo "                 xilinx_u50_gen3x16_xdma_201920_3(default) "
-	@echo "                 xilinx_aws-vu9p-f1_shell-v04261818_201920_2"
-	@echo "                 xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "    Run options:"
+	@echo "    deviceNames : Specify Alveo devices to use for computation. Supported devices:"
+	@echo "                    u50 (default) "
+	@echo "                    u55c"	
+	@echo "                    aws-f1"
+	@echo "                    u200"
 	@echo ""
 	@echo "  make demo"
 	@echo "    Compile cosinesim demo executable"

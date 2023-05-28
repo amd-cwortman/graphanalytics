@@ -99,7 +99,7 @@ inline void udf_set_louvain_offset(uint64_t louvain_offset){
 
 inline void udf_start_whole_graph_collection() {
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "DEBUG: " << __FUNCTION__ << std::endl;
+    std::cout << "AGML-DEBUG: " << __FUNCTION__ << std::endl;
 #endif
     std::lock_guard<std::mutex> lockGuard(xilComDetect::getMutex());
     xilComDetect::Context *pContext = xilComDetect::Context::getInstance();
@@ -110,7 +110,7 @@ inline void udf_start_whole_graph_collection() {
     pContext->mtxFstream.open("/proj/gdba/xgstore/tg.mtx");
 #endif
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "DEBUG: End " << __FUNCTION__ << std::endl;
+    std::cout << "AGML-DEBUG: End " << __FUNCTION__ << std::endl;
 #endif
 }
 
@@ -123,7 +123,7 @@ inline void udf_add_whole_graph_vertex(uint64_t vertexId, uint64_t outDegree) {
     pContext->curParPtr->vertexMap[vertexId] = xilComDetect::LouvainVertex(outDegree);
 #ifdef XILINX_COM_DETECT_DEBUG_ON
     if (pContext->curParPtr->vertexMap.size() % 1000000 == 0)
-        std::cout << "DEBUG: " << __FUNCTION__ << " processed " << pContext->curParPtr->vertexMap.size() << " vertices." << std::endl;
+        std::cout << "AGML-DEBUG: " << __FUNCTION__ << " processed " << pContext->curParPtr->vertexMap.size() << " vertices." << std::endl;
 #endif
 #endif
 }
@@ -133,14 +133,20 @@ inline void udf_add_whole_graph_vertex(uint64_t vertexId, uint64_t outDegree) {
 // Assuming that the prenumbered IDs are not contiguous, each prenumbered ID is mapped to such a contiguous ID
 // starting from 0.  For example, the prenumbered IDs 5, 8, 10 are mapped to compressed IDs 0, 1, 2.
 //
-inline void udf_process_whole_graph_vertices() {
+inline int udf_process_whole_graph_vertices() 
+{
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "DEBUG: " << __FUNCTION__ << std::endl;
-#endif
+    std::cout << "AGML-DEBUG: Start " << __FUNCTION__ << std::endl;
+#endif    
 #ifndef XILINX_COM_DETECT_STUBS_ONLY
     std::lock_guard<std::mutex> lockGuard(xilComDetect::getMutex());
     xilComDetect::Context *pContext = xilComDetect::Context::getInstance();
-    std::cout << "DEBUG: udf_process_whole_graph_vertices: vertexMap.size = " << pContext->curParPtr->vertexMap.size() << std::endl;
+    std::cout << "AGML-INFO: " << __FUNCTION__ << " Vertex count=" << pContext->curParPtr->vertexMap.size() << std::endl;
+
+    if (pContext->curParPtr->vertexMap.size() == 1) {
+        std::cout << "AGML-ERROR: The number of vertices is too small. Double check if vertex ID is loaded with sequential index." << std::endl;
+        return -1;
+    }
     uint64_t id = 0;
     pContext->curParPtr->degree_list.reserve(pContext->curParPtr->vertexMap.size());
 #ifdef XILINX_COM_DETECT_DUMP_MTX
@@ -152,11 +158,12 @@ inline void udf_process_whole_graph_vertices() {
         entry.second.id_ = id++;
     }
     pContext->setNextId(id);
-    std::cout << "DEBUG: number of IDs = " << id << std::endl;
 #endif
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "DEBUG: End " << __FUNCTION__ << std::endl;
+    std::cout << "AGML-DEBUG: End " << __FUNCTION__ << std::endl;
 #endif
+
+    return 0;
 }
 
 // Given a prenumbered (.mtx) ID for a vertex, returns the compressed ID for that vertex.
@@ -204,17 +211,17 @@ inline void udf_start_partition(const std::string &prj_pathname, const std::stri
 
 inline void udf_save_EdgePtr( ){
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "DEBUG: " << __FUNCTION__ << std::endl;
+    std::cout << "AGML-DEBUG: " << __FUNCTION__ << std::endl;
 #endif
 #ifndef XILINX_COM_DETECT_STUBS_ONLY
     std::lock_guard<std::mutex> lockGuard(xilComDetect::getMutex());
-     xilComDetect::Context *pContext = xilComDetect::Context::getInstance();
+    xilComDetect::Context *pContext = xilComDetect::Context::getInstance();
      //build offsets_tg
 
-     pContext->curParPtr->mEdgePtrVec.push_back(0);
-     for(int i = 1;i <= pContext->curParPtr->degree_list.size();i++){
-         pContext->curParPtr->mEdgePtrVec.push_back(pContext->curParPtr->degree_list[i-1] + pContext->curParPtr->mEdgePtrVec[i-1]); //offsets_tg[i] += pContext->offsets_tg[i-1];
-       }
+    pContext->curParPtr->mEdgePtrVec.push_back(0);
+    for(int i = 1;i <= pContext->curParPtr->degree_list.size();i++){
+        pContext->curParPtr->mEdgePtrVec.push_back(pContext->curParPtr->degree_list[i-1] + pContext->curParPtr->mEdgePtrVec[i-1]); //offsets_tg[i] += pContext->offsets_tg[i-1];
+    }
 
      pContext->setOffsetsTg(pContext->curParPtr->mEdgePtrVec.data());
      int size= pContext->curParPtr->mEdgePtrVec.size();
@@ -225,7 +232,7 @@ inline void udf_save_EdgePtr( ){
      //std::cout<< "DEBUG:: mDgrVec SIZE:" << pContext->mDgrVec.size() <<" ;"<< pContext->mEdgePtrVec[size-1] << std::endl;
 #endif
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "DEBUG: End " << __FUNCTION__ << std::endl;
+    std::cout << "AGML-DEBUG: End " << __FUNCTION__ << " NE=" << pContext->curParPtr->mEdgePtrVec[size-1] << std::endl;
 #endif
 }
 
@@ -274,9 +281,7 @@ inline void udf_set_louvain_edge_list( uint64_t louvainIdSource, uint64_t louvai
 }
 
 inline int udf_save_alveo_partition(uint numPar, bool isWholeGraph) {
-#ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "DEBUG: " << __FUNCTION__ << " numPar=" << numPar << std::endl;
-#endif
+    std::cout << "AGML-INFO: " << __FUNCTION__ << " numPar=" << numPar << " isWholeGraph=" << isWholeGraph << std::endl;
 #ifndef XILINX_COM_DETECT_STUBS_ONLY
 
     std::lock_guard<std::mutex> lockGuard(xilComDetect::getMutex());
@@ -292,19 +297,27 @@ inline int udf_save_alveo_partition(uint numPar, bool isWholeGraph) {
     pContext->setEdgelistTg(pContext->curParPtr->mEdgeVec.data());
 
 #ifdef XILINX_COM_DETECT_DEBUG_ON
-    std::cout << "edgelist size:" << pContext->curParPtr->mEdgeVec.size() << std::endl;
-    std::cout << "dgrlist size:" << pContext->curParPtr->mDgrVec.size() << std::endl;
+    std::cout << "    edgelist size:" << pContext->curParPtr->mEdgeVec.size() << std::endl;
+    std::cout << "    dgrlist size:" << pContext->curParPtr->mDgrVec.size() << std::endl;
     for(int i=0; i < 10; i++) {
-        std::cout << i << " head from edgelist  " << pContext->getEdgelistTg()[i].head <<"; ";
+        std::cout << "        " << i << " head from edgelist  " << pContext->getEdgelistTg()[i].head <<"; ";
         std::cout << " tail from edgelist: " << pContext->getEdgelistTg()[i].tail <<"; ";
         std::cout << " outDgr from dgrlist: " << pContext->getDrglistTg()[i] << std::endl;
     }
-    std::cout << "start_vertex: " << pContext->getStartVertex()<<std::endl;
+
+    std::cout << "start_vertex: " << pContext->getStartVertex() <<std::endl;
     std::cout << "end_vertex: " << pContext->getEndVertex() <<std::endl;
 #endif
-
+    long numVertices = pContext->getEndVertex() - pContext->getStartVertex(); 
+    long numEdges = pContext->curParPtr->mEdgeVec.size(); 
     long NV_par_requested;
     long NV_par_max = 64*1000*1000;
+  
+    std::cout << "AGML-INFO: Graph stats:" 
+              << "\n    numVertices=" << numVertices 
+              << "\n    numEdges=" << numEdges 
+              << "\n    NV_par_max=" << NV_par_max << std::endl;
+
     if (numPar>1)
         NV_par_requested = ( pContext->getNextId()+ numPar-1) / numPar;//allow to partition small graph with -par_num
     else
@@ -312,6 +325,8 @@ inline int udf_save_alveo_partition(uint numPar, bool isWholeGraph) {
 
     xilinx_apps::louvainmod::LouvainMod *pLouvainMod = pContext->getLouvainModObj();
     xilinx_apps::louvainmod::LouvainMod::PartitionData partitionData;
+    
+    partitionData.NV_par_max = NV_par_max;
     partitionData.offsets_tg = pContext->getOffsetsTg(); //offsets_tg;
     partitionData.edgelist_tg = pContext->getEdgelistTg(); // edgelist_tg;
     partitionData.drglist_tg = pContext->getDrglistTg(); //drglist_tg;
@@ -320,8 +335,10 @@ inline int udf_save_alveo_partition(uint numPar, bool isWholeGraph) {
     partitionData.isWholeGraph = isWholeGraph;
     if (numPar > 1)
         partitionData.NV_par_requested = NV_par_requested;
+
     int64_t number_of_partitions = (int64_t)pLouvainMod->addPartitionData(partitionData);
-    std::cout << "INFO: " << __FUNCTION__ << " final number_of_partitions=" << number_of_partitions << std::endl;
+    std::cout << "AGML-INFO: " << __FUNCTION__ << " final number_of_partitions=" << number_of_partitions << std::endl;
+    
     return number_of_partitions;
 #endif
 #ifdef XILINX_COM_DETECT_DEBUG_ON

@@ -38,6 +38,7 @@ CREATE QUERY build_csr(STRING v_type, STRING e_type) FOR GRAPH @graph
 
     ListAccum<UINT> @@row_ptr;
     MapAccum<UINT, ListAccum<INT> > @@col_idx;
+    ListAccum<UINT> @@dummy;
 
     udf_reset_timer(true);
     Verts = {v_type.*};
@@ -50,9 +51,15 @@ CREATE QUERY build_csr(STRING v_type, STRING e_type) FOR GRAPH @graph
 
     # build the CSR arrays in C++
     udf_reset_timer(true);
-    FOREACH i in RANGE[0, Start.size()-1] DO
-        udf_build_col_idx(@@col_idx.get(i));
-        num_neighbors = @@col_idx.get(i).size();
+    FOREACH i in RANGE[0, Verts.size()-1] DO
+        IF @@col_idx.containsKey(i) THEN
+            udf_build_col_idx(@@col_idx.get(i));
+            num_neighbors = @@col_idx.get(i).size();
+        ELSE
+            udf_build_col_idx(@@dummy); # if edge map does not exist, add empty array
+            num_neighbors = 0;
+        END;
+
         non_zero_entries = non_zero_entries + num_neighbors;
         @@row_ptr += num_neighbors;
     END;

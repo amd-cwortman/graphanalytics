@@ -17,7 +17,6 @@
 # Product name and version
 STANDALONE_NAME = cosinesim
 PRODUCT_NAME = recomengine
-PRODUCT_VER=$(strip $(shell cat VERSION))
 
 
 .DELETE_ON_ERROR:
@@ -103,9 +102,7 @@ STAGE_EXAMPLES_DIRS = $(SYNTHEA_DIR) $(LOGSIM_DIR) $(DRUGSIM_DIR)
 
 include ../common/Makefile-common.mk
 
-update-version:
-	
-stage: update-version stage-common
+stage: stage-common
 
 clean: clean-common
 

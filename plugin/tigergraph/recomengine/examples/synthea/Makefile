@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
+deviceNames=u50
 
 ifdef sshKey
     SSH_KEY_OPT=-i $(sshKey)

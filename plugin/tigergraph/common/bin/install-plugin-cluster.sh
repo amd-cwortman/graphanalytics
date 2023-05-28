@@ -36,11 +36,13 @@ mem_alloc="tcmalloc"
 debug_flag=0
 device_name="xilinx_u50_gen3x16_xdma_201920_3"
 xrt_profiling=0
+static_mode=0
 uninstall=0
 verbose=0
 node_flags=
+reset_env=0
 force=0
-while getopts ":a:d:fgpuv" opt
+while getopts ":a:d:fgprsuv" opt
 do
 case $opt in
     a) mem_alloc=$OPTARG;;
@@ -48,6 +50,8 @@ case $opt in
     f) force=1; node_flags+=" -f";;
     g) debug_flag=1;;
     p) xrt_profiling=1;;
+    r) reset_env=1;;
+    s) static_mode=1; node_flags+=" -s";;
     u) uninstall=1; node_flags+=" -u";;
     v) verbose=1; node_flags+=" -v";;
     ?) echo "ERROR: Unknown option -$OPTARG"; exit 1;;  # pass through to sub-script
@@ -70,6 +74,7 @@ if [ $verbose -eq 1 ]; then
     echo "      debug_flag=$debug_flag"
     echo "      xrt_profiling=$xrt_profiling"
     echo "      uninstall=$uninstall"
+    echo "      reset_env=$reset_env"
 fi
 
 echo ""
@@ -97,36 +102,50 @@ echo "--------------------------------------------------------------------------
 
 grun all "${SCRIPTPATH}/install-plugin-node.sh $node_flags"
 
+# Uninstall
+
+
+# build a dictionary of existing LD_PRELOAD and LD_LIBRARY_PATH entries
+if [[ $reset_env == 1 ]]; then
+    tgEnv=""
+else
+    tgEnv=$(gadmin config get GPE.BasicConfig.Env)
+fi
+preloadStr=$(sed "s/^LD_PRELOAD=\\([^;]*\\);.*/\\1/" <<< $tgEnv)
+IFS=':' read -a preloadArray <<< $preloadStr
+declare -A preloadDict
+for i in "${preloadArray[@]}"; do 
+    if [[ ! -z $i ]]; then 
+        preloadDict[$i]=1
+    fi
+done
+
+libPathStr=$(sed "s/.*LD_LIBRARY_PATH=\\([^;]*\\);.*/\\1/" <<< $tgEnv)
+IFS=':' read -a libPathArray <<< $libPathStr
+declare -A libPathDict
+for i in "${libPathArray[@]}"; do
+    if [[ ! -z $i ]]; then
+        libPathDict[$i]=1
+    fi
+done
+
+# remove items from the dictionaries that need special handling
+tcmalloc_path=$tg_root_dir/dev/gdk/gsdk/include/thirdparty/prebuilt/dynamic_libs/gmalloc/tcmalloc/libtcmalloc.so
+unset preloadDict['\$LD_PRELOAD']
+unset preloadDict[$tcmalloc_path]
+unset libPathDict['\$LD_LIBRARY_PATH']
+
 if [[ $uninstall -eq 1 ]]; then
+    # remove the product .so from the preload
+    unset preloadDict[$runtimeLibDir/$pluginLibName]
+    # for .deb/.rpm installed Alveo products, remove the lib path from LD_LIBRARY_PATH
+    # for local (sandbox) Alveo products, leave the lib path, as it is common to all plugins
+    if [ $pluginAlveoProductNeedsInstall -eq 1 ]; then
+        unset libPathDict[$runtimeLibDir]
+    fi
     echo "INFO: Restarting GPE service"
     gadmin restart gpe -y
-else
-    # copy gsql-client.jar to tmp directory
-    cp $tg_root_dir/dev/gdk/gsql/lib/gsql_client.jar /tmp/gsql_client.jar.tmp
-    echo "INFO: Apply environment changes to TigerGraph installation"
-    gadmin start all
-    #ld_preload="$HOME/libstd/libstdc++.so.6"
-    ld_preload=
-    if [ $pluginAlveoProductLibNeedsPreload -eq 1 ]; then
-        ld_preload="$ld_preload:$runtimeLibDir/$pluginLibName";
-    fi
-    if [ "$mem_alloc" == "tcmalloc" ]; then
-        ld_preload="$ld_preload:$tg_root_dir/dev/gdk/gsdk/include/thirdparty/prebuilt/dynamic_libs/gmalloc/tcmalloc/libtcmalloc.so"
-    fi
-    ld_lib_path="$HOME/libstd:$runtimeLibDir:/opt/xilinx/xrt/lib:/opt/xilinx/xrm/lib:/usr/lib/x86_64-linux-gnu/"
-    if [ "$xrt_profiling" -eq 1 ]; then
-        gpe_config="LD_PRELOAD=$ld_preload;LD_LIBRARY_PATH=$ld_lib_path:\$LD_LIBRARY_PATH;CPUPROFILE=/tmp/tg_cpu_profiler;CPUPROFILESIGNAL=12;MALLOC_CONF=prof:true,prof_active:false;XILINX_XRT=/opt/xilinx/xrt;XILINX_XRM=/opt/xilinx/xrm;XRT_INI_PATH=$PWD/../scripts/debug/xrt-profile.ini"
-    else
-        gpe_config="LD_PRELOAD=$ld_preload;LD_LIBRARY_PATH=$ld_lib_path:\$LD_LIBRARY_PATH;CPUPROFILE=/tmp/tg_cpu_profiler;CPUPROFILESIGNAL=12;MALLOC_CONF=prof:true,prof_active:false;XILINX_XRT=/opt/xilinx/xrt;XILINX_XRM=/opt/xilinx/xrm"
-    fi
-    gadmin config set GPE.BasicConfig.Env "$gpe_config"
-    # increase RESTPP timeout
-    gadmin config set RESTPP.Factory.DefaultQueryTimeoutSec 36000
-    gadmin config set GUI.HTTPRequest.TimeoutSec 36000
-    echo "INFO: Apply the new configurations to $gpe_config"
-    gadmin config apply -y
-    gadmin restart GPE RESTPP -y
-    gadmin config get GPE.BasicConfig.Env
-    gadmin config get RESTPP.Factory.DefaultQueryTimeoutSec
+    exit 1
 fi
 
+. $SCRIPTPATH/update-tigergraph-config.sh

@@ -17,7 +17,6 @@
 # Product name and version: PRODUCT_NAME is the name for TigerGraph plugin
 STANDALONE_NAME = mis
 PRODUCT_NAME = mis
-PRODUCT_VER=$(strip $(shell cat VERSION))
 
 .DELETE_ON_ERROR:
 .PHONY: all
@@ -62,14 +61,15 @@ STAGE_COPY_FILES = \
 # Example directories into which to copy example common files
 STAGE_EXAMPLES_DIRS = $(EXAMPLE_DIR)
 
+# Files that need the string ALVEO_TG_PLUGIN_PATH rewritten to the plug-in path
+STAGE_PLUGIN_PATH_FILES = \
+    $(EXAMPLE_DIR)/jupyter/travelplan-jupyter-tg.ipynb \
+    $(EXAMPLE_DIR)/jupyter/travelplan-python-tg.py
+
 include ../common/Makefile-common.mk
 
-update-version:
-	sed -i 's,/graphanalytics/$(STANDALONE_NAME)/.*,/graphanalytics/$(STANDALONE_NAME)/$(PRODUCT_VER),g' bin/set-plugin-vars.sh
-	sed -i 's,/$(STANDALONE_NAME)/.*/examples,/$(STANDALONE_NAME)/$(PRODUCT_VER)/examples,g' examples/travelplan/jupyter/travelplan-jupyter-tg.ipynb
-	sed -i 's,/$(STANDALONE_NAME)/.*/examples,/$(STANDALONE_NAME)/$(PRODUCT_VER)/examples,g' examples/travelplan/jupyter/travelplan-python-tg.py
-
-stage: update-version stage-common
+.PHONY: stage
+stage: stage-common update-version
 
 clean: clean-common
 

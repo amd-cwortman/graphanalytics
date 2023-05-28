@@ -12,7 +12,7 @@ Run following commands in the Python virtual environment (from setup) to run the
 
 .. code-block:: bash
 
-    (fpga)$ cp -r /opt/xilinx/apps/graphanalytics/mis/%MIS_VERSION/examples mis-examples
+    (fpga)$ cp -r /opt/amd/apps/agml/mis/%MIS_VERSION/examples mis-examples
     (fpga)$ cd mis-examples/python
     (fpga)$ ./run.sh jupyter notebook jupyter/misdemo_notebook.ipynb
 

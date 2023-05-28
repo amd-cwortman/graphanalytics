@@ -13,7 +13,7 @@
 # under the License.
 
 cmake_minimum_required(VERSION 2.8.11)
-project(xilinx-cosinesim)
+project(amd-cosinesim)
 
 # Linking variables
 set (CMAKE_CXX_STANDARD 14)
@@ -23,9 +23,7 @@ set(CS_FILE_PATH "${CMAKE_SOURCE_DIR}/../staging/")
 set(CMAKE_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/cosinesim/${PROD_VERSION}")
 install(DIRECTORY "${CS_FILE_PATH}/lib/" DESTINATION ${CMAKE_INSTALL_PATH}/lib USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${CS_FILE_PATH}/include/" DESTINATION ${CMAKE_INSTALL_PATH}/include USE_SOURCE_PERMISSIONS)
-
-install(FILES "${CS_FILE_PATH}/xclbin/cosinesim_32bit_xilinx_u50_gen3x16_xdma_201920_3.xclbin" DESTINATION ${CMAKE_INSTALL_PATH}/xclbin)
-install(FILES "${CS_FILE_PATH}/xclbin/cosinesim_32bit_4pu_xilinx_u55c_gen3x16_xdma_base_2.xclbin" DESTINATION ${CMAKE_INSTALL_PATH}/xclbin)
+install(DIRECTORY "${CS_FILE_PATH}/xclbin/" DESTINATION ${CMAKE_INSTALL_PATH}/xclbin USE_SOURCE_PERMISSIONS)
 
 install(FILES "${CS_FILE_PATH}/src/cosinesim_loader.cpp" DESTINATION ${CMAKE_INSTALL_PATH}/src)
 #install(FILES "${CS_FILE_PATH}/examples.zip" DESTINATION ${CMAKE_INSTALL_PATH}/)
@@ -34,7 +32,7 @@ install(FILES "${CS_FILE_PATH}/VERSION" DESTINATION ${CMAKE_INSTALL_PATH}/ )
 
 #version 
 
-set(CPACK_PACKAGE_NAME "xilinx-cosinesim-${PROD_VERSION}")
+set(CPACK_PACKAGE_NAME "amd-cosinesim-${PROD_VERSION}")
 set(CPACK_PACKAGE_VERSION "1.0.0")
 
 # --- LSB Release ---
@@ -83,8 +81,8 @@ message("-- ${CMAKE_BUILD_TYPE} ${PACKAGE_KIND} package")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "xrt (>= 2.8.0),xrm (>= 1.2.0),python3")
 set(CPACK_RPM_PACKAGE_DEPENDS "xrt (>= 2.8.0), xrm (>= 1.2.0),python3 (>= 3.6)")
 #set(CPACK_PACKAGE_VERSION "1.0.0_18.04-x86_64")
-set(CPACK_PACKAGE_CONTACT "Xilinx CosineSim Development Team")
-set(CPACK_PACKAGE_VENDOR "Xilinx")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Xilinx Cosinesim Acceleration")
-set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/opt" "/opt/xilinx" "/usr/lib64" "/opt/xilinx/apps" "/opt/xilinx/apps/graphanalytics"  )
+set(CPACK_PACKAGE_CONTACT "AMD AGML Development Team")
+set(CPACK_PACKAGE_VENDOR "AMD")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "AMD AGML Cosine Similarity Package")
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/opt" "/opt/amd" "/usr/lib64" "/opt/amd/apps" "/opt/amd/apps/agml"  )
 include(CPack)

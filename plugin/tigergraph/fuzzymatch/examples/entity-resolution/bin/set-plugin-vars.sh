@@ -21,7 +21,7 @@ SCRIPT=$(readlink -f $0)
 SCRIPTPATH=`dirname $SCRIPT`
 
 # UDF module name for this plugin.  This value is used by mergeHeaders to identify the plugin in ExprFunctions.hpp
-PLUGIN_NAME=entityResolution
+PLUGIN_NAME=entityResolutionDemo
 
 # Header file containing UDFs for the plugin
 PLUGIN_MAIN_UDF=entityResolution.hpp

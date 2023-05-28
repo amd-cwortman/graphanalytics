@@ -53,7 +53,6 @@ function usage() {
 	echo "                         1: Run only on CPU"
 	echo "                         2: Run only on Alveo (default)"
 	echo "                         3: Run on both CPU and Alveo"    
-    echo "  -d numDevices        : number of FPGAs needed (default=1)"
     echo "  -f                   : Force (re)install"
     echo "  -g graphName         : graph name (default=social_<username>"
     echo "  -i sshKey            : SSH key for user tigergraph"    
@@ -119,11 +118,11 @@ if [ -z "$username" ] || [ -z "$password" ]; then
     exit 2
 fi
 
-if [ -z "$alveo_prj" ]; then
-    echo "ERROR: Alveo project must be specified."
-    usage
-    exit 3
-fi
+#if [ -z "$alveo_prj" ]; then
+#    echo "ERROR: Alveo project must be specified."
+#    usage
+#    exit 3
+#fi
 
 if [ $(gsql -u $username -p $password "show user" | grep -c $username) -lt 1 ]; then
     echo "ERROR: TigerGraph user $username does not exist."

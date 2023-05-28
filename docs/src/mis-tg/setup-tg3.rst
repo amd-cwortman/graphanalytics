@@ -14,7 +14,7 @@ Set up Maximal Independent Set for TigerGraph 3.x
 
     (fpga)$ mkdir mis-example
     (fpga)$ cd mis-example
-    (fpga)$ cp -r /opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/mis/%MIS_TG_VERSION/examples .
+    (fpga)$ cp -r /opt/amd/apps/agml/integration/Tigergraph-3.x/agml/%PACKAGE_VERSION/mis/examples .
 
 
 3. Install demo specific plugin

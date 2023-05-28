@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-deviceNames=xilinx_u50_gen3x16_xdma_201920_3
+deviceNames=u50
 graphName=travelplan_$(USER)
 tp2tr=$(abspath $(CURDIR)/data/travelplan2trucks100.csv)
 tp2wo=$(abspath $(CURDIR)/data/travelplan2workorders100.csv)
@@ -89,8 +89,8 @@ help:
 	@echo ""
 	@echo "Parameter descriptions:"
 	@echo "deviceNames : Target device name. Supported devices: "
-	@echo "              xilinx_u50_gen3x16_xdma_201920_3 (default)"
-	@echo "              xilinx_u55c_gen3x16_xdma_base_2"
+	@echo "                u50 (default)"
+	@echo "                u55c"
 	@echo "graphName   : graph name (default=travelplan_<username>"
 	@echo "tp2tr       : CSV file with travel plan to truck mapping"
 	@echo "tp2wo       : CSV file with travel plan to work order mapping"

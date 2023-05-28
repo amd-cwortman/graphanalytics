@@ -21,10 +21,10 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-Alveo-Accelerated GraphAnalytics
-================================
+Accelerated Graph Machine Learning Library
+==========================================
 
-We offer ready-to-use Alveo-Accelerated GraphAnalytics products for variety of 
+We offer ready-to-use Accelerated Graph Machine Learning (AGML) library for variety of 
 business applications. You can use them on-prem or in cloud (AWS, Azure etc.). 
 The accelerated products can be installed on top of your existing Tigergraph 
 installation or can be used standalone. Using the Alveo-accelerated 

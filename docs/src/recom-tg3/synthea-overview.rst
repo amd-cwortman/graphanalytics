@@ -3,7 +3,7 @@ Synthea Demo Overview
 
 This section describes the structure and operation of the Synthea demo.
 You can find its files under the Recommendation Engine installation
-at ``/opt/xilinx/apps/graphanalytics/integration/Tigergraph-3.x/1.0/examples/synthea``.  Files mentioned
+at ``/opt/amd/apps/agml/integration/Tigergraph-3.x/1.0/examples/synthea``.  Files mentioned
 in the descriptions below are located relative to this directory unless otherwise stated.
 
 Patient Data

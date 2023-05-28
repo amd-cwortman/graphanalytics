@@ -1,40 +1,28 @@
-# Level 2: Predefined Kernels
+This directory contains HLS source code for kernels in AMD Graph and Machine Learning (AGML) libraries. The AGML installation package includes pre-built XCLBINs for all these kernels. 
+If you want to customize the kernels, follow the instructions below to rebuild XCLBINs. 
 
-The level 2 of Vitis Graph Library contains the host-callable kernels. For more details information, please reference to [_L2 User Guide_](https://pages.gitenterprise.xilinx.com/FaaSApps/xf_graph/2020.1/index.html) in the document for usage and design information.
+# Set up Vitis
 
-# Vitis Tests for Kernels
+The kernels are validated with Vitis 2022.1. Run the command below to set up Vitis environments:
+```
+source <install path>/Vitis/2022.1/settings64.sh
+source /opt/xilinx/xrt/setup.sh
+```
 
-Simple tests are included for each of Graph kernels to discover simple regression errors.
-
+# Build and Test Kernels
 To run a test for a specific kernel, execute the following command:
-
 ```
 cd <KERNEL-NAME>
 git submodule update --init --recursive
-source <install path>/Vitis/2020.2/settings64.sh
-source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 make run TARGET=sw_emu DEVICE=xilinx_u50_gen3x16_xdma_201920_3
 ```
-
 `TARGET` can also be `hw_emu` or `hw`.
 
-# License
+Follow the instructions below to build XCLBINs for currently supported devices. 
 
-Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
+## Louvain Modularity Kernel
+### U55C 
+```
 
-    Copyright 2020-2021 Xilinx, Inc.
-    
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-    
-        http://www.apache.org/licenses/LICENSE-2.0
-    
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-    Copyright 2020-2021 Xilinx, Inc.
-
+```

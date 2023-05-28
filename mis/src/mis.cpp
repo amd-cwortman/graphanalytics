@@ -60,10 +60,11 @@ struct aligned_allocator {
     }
 };
 
-class MisImpl {
+class MisImpl : public ImplBase {
    public:
     Options options_;
     MisImpl(const Options& options) : options_(options) {}
+    virtual ~MisImpl() {}
 
     static const int mVertexLimits = 1024000;
     int device_id = 0;
@@ -79,26 +80,31 @@ class MisImpl {
     xrt::bo d_mPrior;
 
     uint16_t* mPrior;
-    GraphCSR* mOrigGraph;
+    const GraphCSR* mOrigGraph;  // not owned
     std::vector<int, aligned_allocator<int> > mRowPtr;
     std::vector<int*> mColIdx;
     std::vector<xrt::bo> d_sync, d_colIdx;
-    // The intialize process will download FPGA binary to FPGA card
+    // The initialization process will download FPGA binary to FPGA card
     void startMis(const std::string& xclbinPath, const std::string& deviceNames);
-    void setGraph(GraphCSR* graph);
     void graphPadding();
-    std::vector<std::vector<int> > executeMIS(int iter);
     void evict(const std::vector<int>&);
     void fresh();
     void genPrior();
     bool verifyMis();
 
     int getDevice(const std::string& deviceNames);
-    size_t count() const;
+
     // internal only
     // static void init(const GraphCSR<host_buffer_t<int> >*, host_buffer_t<uint16_t>&);
     // static bool verifyMis(GraphCSR<host_buffer_t<int> >*, const host_buffer_t<uint8_t>&);
     // static size_t count(const int, const host_buffer_t<uint8_t>&);
+
+    // ImplBase Implementation
+    
+    virtual void startMis() override { startMis(options_.xclbinPath, options_.deviceNames); }
+    virtual void setGraph(const GraphCSR* graph) override;
+    virtual XVector<XVector<int>> executeMIS(int iter) override;
+    virtual size_t count() const override;
 };
 
 int MisImpl::getDevice(const std::string& deviceNames) {
@@ -110,7 +116,8 @@ int MisImpl::getDevice(const std::string& deviceNames) {
         std::string curDeviceName = mDevice.get_info<xrt::info::device::name>();
 
         // the device name on aws-f1 may show up in three forms
-        if (deviceNames == curDeviceName ||
+        if ((deviceNames == "u50" && curDeviceName == "xilinx_u50_gen3x16_xdma_201920_3") ||
+            (deviceNames == "u55c" && curDeviceName == "xilinx_u55c_gen3x16_xdma_base_2") ||
             (deviceNames == "aws-f1" && (curDeviceName == "xilinx_aws-vu9p-f1_dynamic-shell" ||
                                          curDeviceName == "xilinx_aws-vu9p-f1_shell-v04261818_201920_2" ||
                                          curDeviceName == "xilinx_aws-vu9p-f1_shell-v04261818_201920_3"))) {
@@ -124,12 +131,6 @@ int MisImpl::getDevice(const std::string& deviceNames) {
     }
     return status;
 }
-
-/*
-void MIS::evict(const std::vector<int>& list) {
-    pImpl_->evict(list);
-}
-*/
 
 void MisImpl::fresh() {
     for (int i = 0; i < mOrigGraph->n; i++) {
@@ -150,22 +151,18 @@ void MisImpl::evict(const std::vector<int>& list) {
     }
 }
 
-void MIS::startMis() {
-    pImpl_->startMis(pImpl_->options_.xclbinPath, pImpl_->options_.deviceNames);
-}
-
 void MisImpl::startMis(const std::string& xclbinPath, const std::string& deviceNames) {
     if (getDevice(deviceNames) < 0) {
         // std::cout << "ERROR: Unable to find device " << deviceNames << std::endl;
         // return -2;
         std::ostringstream oss;
-        oss << "Uable to find device" << deviceNames << "; Please ensure the machine has proper card" << std::endl;
+        oss << "Unable to find device " << deviceNames << "; Please ensure the machine has proper card" << std::endl;
         throw xilinx_apps::mis::Exception(oss.str());
         std::cerr << "ERROR: Unable to find device " << deviceNames << std::endl;
         abort();
     } else
         std::cout << "INFO: Start MIS on " << deviceNames << std::endl;
-
+    
     try {
         mDevice = xrt::device(device_id);
         auto uuid = mDevice.load_xclbin(xclbinPath);
@@ -204,10 +201,18 @@ void MisImpl::startMis(const std::string& xclbinPath, const std::string& deviceN
         }
     } catch (std::bad_alloc& e) {
         std::cout << "Error: memory allocation failed. Maybe the CU on the device is busy." << std::endl;
-        exit(EXIT_FAILURE);
+//        exit(EXIT_FAILURE);
+        throw;
+    } catch (std::ios_base::failure& e) {
+    // The following line didn't compile on AWS (CentOS 7.9) with scl devtoolset-9 because of code().
+    // Needs investigation.  For now, commenting out code().
+//        std::cout << "Error: I/O error during startMis, error code = " << e.code() << ". " << e.what() << std::endl;
+        std::cout << "Error: I/O error during startMis. " << e.what() << std::endl;
+        throw;
     } catch (const std::exception& exc) {
-        std::cout << "Error: " << exc.what() << std::endl;
-        exit(EXIT_FAILURE);
+        std::cout << "Error: Failure during startMis: " << exc.what() << std::endl;
+//        exit(EXIT_FAILURE);
+        throw;
     }
     // return 0;
 }
@@ -224,10 +229,6 @@ void MisImpl::genPrior() {
         mPrior[i] &= 0x03fff;
     }
 }
-// from liang's local mis_kernel_xrt.cpp
-size_t MIS::count() const {
-    return pImpl_->count();
-}
 
 size_t MisImpl::count() const {
     size_t num = 0;
@@ -236,11 +237,6 @@ size_t MisImpl::count() const {
         if (rp == 1) num++;
     }
     return num;
-}
-
-// void MIS::setGraph(GraphCSR<std::vector<int> >* graph) { pImpl_->setGraph(graph);}
-void MIS::setGraph(GraphCSR* graph) {
-    pImpl_->setGraph(graph);
 }
 
 void MisImpl::graphPadding() {
@@ -303,18 +299,21 @@ void MisImpl::graphPadding() {
 }
 
 // void MisImpl::setGraph(GraphCSR<std::vector<int> >* graph) {
-void MisImpl::setGraph(GraphCSR* graph) {
+void MisImpl::setGraph(const GraphCSR* graph) {
     mOrigGraph = graph;
     int n = mOrigGraph->n;
     if (n > mVertexLimits) {
-        std::cout << "Graph with more than " << mVertexLimits << " vertices is not supported." << std::endl;
-        exit(EXIT_FAILURE);
+        std::ostringstream oss;
+        oss << "ERROR: Graph with more than " << mVertexLimits << " vertices is not supported.";
+        std::cout << oss.str() << std::endl;
+        //exit(EXIT_FAILURE);
+        throw Exception(oss.str());
     }
 
     int nz = mOrigGraph->colIdxSize;
 
     // process the graph
-    std::cout << "Processing the graph with " << n << " vertices and " << nz / 2 << " edges." << std::endl;
+    std::cout << "INFO: Processing the graph with " << n << " vertices and " << nz / 2 << " edges." << std::endl;
 
     // convert back tp graphCSR
     // std::unique_ptr<GraphCSR>  graphAfter{createFromGraph(graphAdj.get())};
@@ -328,16 +327,12 @@ void MisImpl::setGraph(GraphCSR* graph) {
     d_mPrior = xrt::bo(mDevice, n * sizeof(uint16_t), mKernel.group_id(2 + mNumChannels));
 
     mPrior = d_mPrior.map<uint16_t*>();
-    genPrior();
     d_rowPtr = xrt::bo(mDevice, (void*)mRowPtr.data(), mRowPtr.size() * sizeof(int), mKernel.group_id(1));
     d_rowPtr.sync(XCL_BO_SYNC_BO_TO_DEVICE);
 }
 
-std::vector<std::vector<int> > MIS::executeMIS(int iter) {
-    return pImpl_->executeMIS(iter);
-}
-
-std::vector<std::vector<int> > MisImpl::executeMIS(int iter) {
+xilinx_apps::XVector<xilinx_apps::XVector<int> > MisImpl::executeMIS(int iter) {
+    std::cout << "INFO: Xilinx MIS execution..." << std::endl;
     auto run = xrt::run(mKernel);
     int nargs = 0;
     run.set_arg(nargs++, mOrigGraph->n);
@@ -345,10 +340,13 @@ std::vector<std::vector<int> > MisImpl::executeMIS(int iter) {
     for (xrt::bo& bo : d_sync) run.set_arg(nargs++, bo);
     run.set_arg(nargs++, d_mPrior);
 
+    // generate the priority values
+    genPrior();
+
     int size = 0;
     int n = mOrigGraph->n;
     iter = iter <= 0 || iter > n ? n : iter;
-    std::vector<std::vector<int> > ret;
+    XVector<XVector<int> > ret;
     ret.reserve(iter);
 
     for (int i = 0; i < iter && size < n; i++) {
@@ -358,7 +356,7 @@ std::vector<std::vector<int> > MisImpl::executeMIS(int iter) {
         run.wait();
         d_mPrior.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
 
-        std::vector<int> result;
+        XVector<int> result;
         result.reserve(n);
         for (int idx = 0; idx < n; idx++) {
             int rp = mPrior[idx] >> 14;
@@ -412,11 +410,11 @@ bool MisImpl::verifyMis() {
 
 extern "C" {
 
-xilinx_apps::mis::MisImpl* xilinx_mis_createImpl(const xilinx_apps::mis::Options& options) {
+xilinx_apps::mis::ImplBase* xilinx_mis_createImpl(const xilinx_apps::mis::Options& options) {
     return new xilinx_apps::mis::MisImpl(options);
 }
 
-void xilinx_mis_destroyImpl(xilinx_apps::mis::MisImpl* pImpl) {
+void xilinx_mis_destroyImpl(xilinx_apps::mis::ImplBase* pImpl) {
     delete pImpl;
 }
 
